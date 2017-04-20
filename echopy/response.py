@@ -1,3 +1,23 @@
+import json
+
+
+class Response:
+    def __init__(self, output_speech=None, card=None, reprompt=None,
+                 should_end_session=None, directives=None,
+                 session_attributes=None, version='1.0'):
+        self.response = ResponseObject(output_speech, card, reprompt,
+                                       should_end_session, directives)
+        self.version = version
+        self.session_attributes = session_attributes
+
+    def to_json(self):
+        resp_dict = {'version': self.version,
+                     'response': self.response.to_json()}
+        if self.session_attributes:
+            resp_dict['sessionAttributes'] = self.session_attributes
+        return resp_dict
+
+
 class ResponseBody:
     def __init__(self, response, session_attributes=None, version='1.0'):
         self.response = response
@@ -12,7 +32,7 @@ class ResponseBody:
         return resp_json
 
 
-class Response:
+class ResponseObject:
     def __init__(self, output_speech=None, card=None, reprompt=None,
                  should_end_session=None, directives=None):
         self.output_speech = output_speech

@@ -1,4 +1,5 @@
 from collections import namedtuple
+import echopy
 
 Application = namedtuple('Application', 'application_id')
 
@@ -16,6 +17,11 @@ class Request:
         self.session = session
         self.context = context
         self.request = request
+
+        if self.session.application.application_id != echopy.application_id:
+            raise Exception(f"Expected appID {echopy.application_id} "
+                            f"but received "
+                            f"{self.session.application.application_id}")
 
     @staticmethod
     def from_json(json_obj):
@@ -134,11 +140,7 @@ class System:
 
 
 class LaunchRequest:
-    attr_map = {
-        'requestId': 'request_id',
-        'timestamp': 'timestamp',
-        'locale': 'locale'
-    }
+    request_type = 'LaunchRequest'
 
     def __init__(self, request_id, timestamp, locale):
         self.request_id = request_id
@@ -152,10 +154,7 @@ class LaunchRequest:
 
 
 class IntentRequest:
-    attr_map = {
-        'requestId': 'request_id',
-
-    }
+    request_type = 'IntentRequest'
 
     def __init__(self, request_id, timestamp, locale, dialog_state, intent):
         self.request_id = request_id
@@ -181,16 +180,17 @@ class Intent:
 
     @staticmethod
     def from_json(json_obj):
-        json_slots = json_obj.get('slots')
-        if json_slots:
-            slots = {}
-            for k, v in json_slots.items():
-                slots[k] = Intent._Slot(v.get('name'), v.get('value'),
-                                        v.get('confirmationStatus'))
-        return Intent(json_obj['name'], json_obj['confirmationStatus'], slots)
+        json_slots = json_obj.get('slots', {})
+        slots = {}
+        for k, v in json_slots.items():
+            slots[k] = Intent._Slot(v.get('name'), v.get('value'),
+                                    v.get('confirmationStatus'))
+        return Intent(json_obj['name'], json_obj.get('confirmationStatus'),
+                      slots)
 
 
 class SessionEndedRequest:
+    request_type = 'SessionEndedRequest'
     _Error = namedtuple('Error', 'type message')
 
     def __init__(self, request_id, timestamp, locale, reason, error):
