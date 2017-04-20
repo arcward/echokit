@@ -16,7 +16,7 @@ Alexa dev portal).
 There are decorators for the three basic requests Alexa skills need to
 handle: ``LaunchRequest``, ``SessionEndedRequest`` and ``IntentRequest``.
 Those are ``@echopy.on_session_launch``, ``@echopy.on_session_end``, and
-``echopy.on_intent('some_intent')``
+``@echopy.on_intent('some_intent')``
 
 The ``example_main.py`` file:
 
@@ -77,5 +77,5 @@ The project structure for ``example_main.py`` would be::
     example_main.py
         echopy/
 
-You would zip ``example_main.py`` and ``echopy/`` togehter (not their
+You would zip ``example_main.py`` and ``echopy/`` together (not their
 parent directory) and upload to Lambda, and be on your way!
