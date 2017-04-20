@@ -1,5 +1,5 @@
 import echopy
-from echopy import Response, OutputSpeech
+from echopy import Response, OutputSpeech, SimpleCard
 
 
 def handler(event, context):
@@ -28,6 +28,16 @@ def on_intent(event):
 
 @echopy.on_intent('SpecificIntent')
 def specific_intent(event):
-    response_text = (f"You asked me to "
-                     f"{event.request.intent.slots['Order'].value}")
-    return Response(output_speech=OutputSpeech(text=response_text))
+    order = event.request.intent.slots['Order'].value
+    session_attrs = {'last_order': order}
+    response_text = f'You asked me to {order}'
+    return Response(output_speech=OutputSpeech(text=response_text),
+                    session_attributes=session_attrs)
+
+
+@echopy.on_intent('CardIntent')
+def card_intent(event):
+    card_hand = event.request.intent.slots['Suit'].value
+    simple_card = SimpleCard(title="Simple", content=f"Played {card_hand}")
+    output_speech = OutputSpeech(text=f"Was your card a(n)... {card_hand}?")
+    return Response(output_speech=output_speech, card=simple_card)

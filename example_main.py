@@ -23,6 +23,7 @@ def session_started(event):
     output_speech = OutputSpeech(text="You started a new session!")
     return Response(output_speech=output_speech)
 
+
 # Handles: SessionEndedRequest
 @echopy.on_session_end
 def session_ended(event):
@@ -41,8 +42,11 @@ def on_intent(event):
 # This example is for an intent that handles a slot,
 # showing how to access the intent's 'Order' slot.
 # This would return output speech like: 'You asked me to jump'
+# The session variable would be returned on the next invocation
 @echopy.on_intent('OrderIntent')
 def specific_intent(event):
-    response_text = (f"You asked me to "
-                     f"{event.request.intent.slots['Order'].value}")
-    return Response(output_speech=OutputSpeech(text=response_text))
+    order = event.request.intent.slots['Order'].value
+    session_attrs = {'last_order': order}
+    response_text = f'You asked me to {order}'
+    return Response(output_speech=OutputSpeech(text=response_text),
+                    session_attributes=session_attrs)
