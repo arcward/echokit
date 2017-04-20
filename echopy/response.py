@@ -1,14 +1,31 @@
-import json
+"""Alexa response models
+
+The ``Response`` object is what you'll return to the Alexa service. It 
+will contain your ``OutputSpeech``, ``Card``, ``Reprompt``...
+"""
+from typing import Dict
 
 
 class Response:
+    """Container for response parameters and ``ResponseObject``"""
     def __init__(self, output_speech=None, card=None, reprompt=None,
                  should_end_session=None, directives=None,
                  session_attributes=None, version='1.0'):
+        """
+        
+        :param output_speech: ``OutputSpeech`` object
+        :param card: ``Card`` object
+        :param reprompt: ``Reprompt`` object
+        :param should_end_session: ``True`` or ``False``
+        :param directives: Array of device-level directives 
+            (such as for ``AudioPlayer``)
+        :param session_attributes: dict of session attributes
+        :param version: Default: *1.0*
+        """
         self.response = ResponseObject(output_speech, card, reprompt,
                                        should_end_session, directives)
-        self.version = version
-        self.session_attributes = session_attributes
+        self.version: str = version
+        self.session_attributes: Dict[str, object] = session_attributes
 
     def to_json(self):
         resp_dict = {'version': self.version,
@@ -18,21 +35,8 @@ class Response:
         return resp_dict
 
 
-class ResponseBody:
-    def __init__(self, response, session_attributes=None, version='1.0'):
-        self.response = response
-        self.session_attributes = session_attributes
-        self.version = version
-
-    def to_json(self):
-        resp_json = {'version': self.version,
-                     'response': self.response.to_json()}
-        if self.session_attributes:
-            resp_json['sessionAttributes'] = self.session_attributes
-        return resp_json
-
-
 class ResponseObject:
+    """Response object inside response body. Instantiated by ``Response``"""
     def __init__(self, output_speech=None, card=None, reprompt=None,
                  should_end_session=None, directives=None):
         self.output_speech = output_speech
@@ -65,10 +69,9 @@ class ResponseObject:
                         json_obj.get('directives'))
 
     def to_json(self):
-        response_dict = {
-            'shouldEndSession': self.should_end_session,
-            'directives': self.directives
-        }
+        response_dict = {'shouldEndSession': self.should_end_session,
+                         'directives': self.directives}
+
         if self.output_speech:
             response_dict['outputSpeech'] = self.output_speech.to_json()
 
@@ -83,9 +86,17 @@ class ResponseObject:
 
 class OutputSpeech:
     def __init__(self, type='PlainText', text=None, ssml=None):
-        self.type = type  #: PlainText or SSML
-        self.text = text  #: Required if PlainText
-        self.ssml = ssml  #: Required if SSML
+        """
+        
+        :param type: *PlainText* or *SSML*. If *PlainText*, then 
+            the ``text`` parameter must be passed. If *SSML*, then 
+            pass ``ssml``. Default: *PlainText* 
+        :param text: *PlainText* response
+        :param ssml: SSML response
+        """
+        self.type: str = type  #: PlainText or SSML
+        self.text: str = text  #: Required if PlainText
+        self.ssml: str = ssml  #: Required if SSML
 
     @staticmethod
     def from_json(json_obj):
@@ -102,6 +113,7 @@ class OutputSpeech:
 
 
 class SimpleCard:
+    """Simple card, supporting only *title* and *content*"""
     card_type = 'Simple'
 
     def __init__(self, title=None, content=None):
@@ -117,6 +129,7 @@ class SimpleCard:
 
 
 class StandardCard:
+    """Standard card, supporting title/text and a (small/large) image"""
     card_type = 'Standard'
 
     def __init__(self, title=None, text=None, small_image_url=None,
@@ -128,6 +141,7 @@ class StandardCard:
 
     @property
     def image(self):
+        """If any image URL is provided, return dict, otherwose None"""
         if not (self.small_image_url or self.large_image_url):
             return None
         img = {}
@@ -149,6 +163,7 @@ class StandardCard:
 
 
 class LinkAccountCard:
+    """LinkAccount card, supporting only *content*"""
     card_type = 'LinkAccount'
 
     def __init__(self, content=None):
@@ -162,7 +177,7 @@ class LinkAccountCard:
 
 
 class Reprompt:
-    """Only in respones to ``LaunchRequest`` or ``IntentRequest``"""
+    """Reprompt, only in respones to ``LaunchRequest`` or ``IntentRequest``"""
     def __init__(self, output_speech=None):
         self.output_speech = output_speech
 

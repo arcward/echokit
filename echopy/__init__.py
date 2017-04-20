@@ -10,6 +10,14 @@ request_handlers = {}
 
 
 def handler(event, context):
+    """Lambda service calls this method when sending us a request
+    
+    :param event: Contains data on the Alexa request, used to 
+        create ``echopy.request.Request``
+    :param context: Request context, used primarily for logging. **Note**: 
+        *Not* the same as ``echopy.request.Context``
+    :return: Dict of ``echopy.response.Response`` object
+    """
     print(f"Log stream name: {context.log_stream_name}")
     print(f"Log group name: {context.log_group_name}")
     print(f"Request ID: {context.aws_request_id}")
