@@ -44,10 +44,14 @@ class Request:
 
     @staticmethod
     def from_json(json_obj):
-        return Request(json_obj['version'],
-                       Session.from_json(json_obj['session']),
-                       Context.from_json(json_obj['context']),
-                       Request._factory(json_obj['request']))
+        context = json_obj.get('context')
+        if context:
+            context = Context.from_json(context)
+
+        return Request(
+            json_obj['version'], Session.from_json(json_obj['session']),
+            context, Request._factory(json_obj['request'])
+        )
 
     @staticmethod
     def _factory(json_request):
