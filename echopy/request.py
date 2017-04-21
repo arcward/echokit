@@ -1,25 +1,14 @@
+"""Models of objects in requests received from the Alexa service
+
+https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interface-reference#session-object
+
+"""
 from collections import namedtuple
 from typing import Dict
 
 import echopy
 
 Application = namedtuple('Application', 'application_id')
-
-
-class User:
-    """Describes a user making a request"""
-    def __init__(self, user_id, access_token, permissions):
-        """
-        
-        :param user_id: User ID generated when user enables skill in 
-            the Alexa app (max 255 chars)
-        :param access_token: Identifies the user in another system
-        :param permissions: Contains ``consentToken`` allowing the skill 
-            access to information a user's consented o provide
-        """
-        self.user_id = user_id
-        self.access_token = access_token
-        self.permissions = permissions
 
 
 class Request:
@@ -187,6 +176,23 @@ class System:
         return {k: v for (k, v) in sys_dict if v is not None}
 
 
+class User:
+    """Describes a user making a request"""
+
+    def __init__(self, user_id, access_token, permissions):
+        """
+
+        :param user_id: User ID generated when user enables skill in 
+            the Alexa app (max 255 chars)
+        :param access_token: Identifies the user in another system
+        :param permissions: Contains ``consentToken`` allowing the skill 
+            access to information a user's consented o provide
+        """
+        self.user_id = user_id
+        self.access_token = access_token
+        self.permissions = permissions
+
+
 class LaunchRequest:
     """Received when the user didn't provide a specific intent"""
     request_type = 'LaunchRequest'
@@ -200,6 +206,42 @@ class LaunchRequest:
     def from_json(json_obj):
         return LaunchRequest(json_obj['requestId'], json_obj['timestamp'],
                              json_obj['locale'])
+
+
+class SessionEndedRequest:
+    """Received upon user exit, lack of response, or error.
+
+    Not received if the session is ended because you set the 
+    ``should_end_session`` flag to ``True``
+    """
+    request_type = 'SessionEndedRequest'
+    _Error = namedtuple('Error', 'type message')
+
+    def __init__(self, request_id, timestamp, locale, reason, error):
+        """
+
+        :param request_id: 
+        :param timestamp: 
+        :param locale: 
+        :param reason: Describes reason for session end. Values: 
+            ``USER_INITIATED``, ``ERROR``, ``EXCEEDED_MAX_REPROMPTS``
+        :param error: ``Error`` object with more info on any error
+        """
+        self.request_id = request_id
+        self.timestamp = timestamp
+        self.locale = locale
+        self.reason = reason
+        self.error = error
+
+    @staticmethod
+    def from_json(json_obj):
+        error = SessionEndedRequest._Error(json_obj.get('type'),
+                                           json_obj.get('message'))
+        return SessionEndedRequest(json_obj['requestId'],
+                                   json_obj['timestamp'],
+                                   json_obj['locale'],
+                                   json_obj.get('dialogState'),
+                                   error)
 
 
 class IntentRequest:
@@ -275,42 +317,6 @@ class Slot:
     def from_json(json_obj):
         return Slot(json_obj.get('name'), json_obj.get('value'),
                     json_obj.get('confirmationStatus'))
-
-
-class SessionEndedRequest:
-    """Received upon user exit, lack of response, or error.
-    
-    Not received if the session is ended because you set the 
-    ``should_end_session`` flag to ``True``
-    """
-    request_type = 'SessionEndedRequest'
-    _Error = namedtuple('Error', 'type message')
-
-    def __init__(self, request_id, timestamp, locale, reason, error):
-        """
-        
-        :param request_id: 
-        :param timestamp: 
-        :param locale: 
-        :param reason: Describes reason for session end. Values: 
-            ``USER_INITIATED``, ``ERROR``, ``EXCEEDED_MAX_REPROMPTS``
-        :param error: ``Error`` object with more info on any error
-        """
-        self.request_id = request_id
-        self.timestamp = timestamp
-        self.locale = locale
-        self.reason = reason
-        self.error = error
-
-    @staticmethod
-    def from_json(json_obj):
-        error = SessionEndedRequest._Error(json_obj.get('type'),
-                                           json_obj.get('message'))
-        return SessionEndedRequest(json_obj['requestId'],
-                                   json_obj['timestamp'],
-                                   json_obj['locale'],
-                                   json_obj.get('dialogState'),
-                                   error)
 
 
 class AudioPlayer:
