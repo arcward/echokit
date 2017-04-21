@@ -45,29 +45,6 @@ class ResponseObject:
         self.should_end_session = should_end_session
         self.directives = directives
 
-    @staticmethod
-    def from_json(json_obj):
-        output_speech = json_obj.get('outputSpeech')
-        if output_speech:
-            output_speech = OutputSpeech.from_json(output_speech)
-
-        reprompt = json_obj.get('reprompt')
-        if reprompt:
-            reprompt = Reprompt.from_json(reprompt)
-
-        card = json_obj.get('card', {})
-        card_type = card.get('type')
-        if card_type == 'Simple':
-            card = SimpleCard.from_json(card)
-        elif card_type == 'Standard':
-            card = StandardCard.from_json(card)
-        elif card_type == 'LinkAccount':
-            card = LinkAccountCard.from_json(card)
-
-        return Response(output_speech, card, reprompt,
-                        json_obj.get('shouldEndSession'),
-                        json_obj.get('directives'))
-
     def to_json(self):
         response_dict = {'shouldEndSession': self.should_end_session,
                          'directives': self.directives}
@@ -97,11 +74,6 @@ class OutputSpeech:
         self.type: str = type  #: PlainText or SSML
         self.text: str = text  #: Required if PlainText
         self.ssml: str = ssml  #: Required if SSML
-
-    @staticmethod
-    def from_json(json_obj):
-        return OutputSpeech(json_obj.get('type'), json_obj.get('text'),
-                            json_obj.get('ssml'))
 
     def to_json(self):
         speech_dict = {'type': self.type}
@@ -180,10 +152,6 @@ class Reprompt:
     """Reprompt, only in respones to ``LaunchRequest`` or ``IntentRequest``"""
     def __init__(self, output_speech=None):
         self.output_speech = output_speech
-
-    @staticmethod
-    def from_json(json_obj):
-        return Reprompt(OutputSpeech.from_json(json_obj.get('outputSpeech')))
 
     def to_json(self):
         rp_dict = {}
