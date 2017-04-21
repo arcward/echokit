@@ -24,6 +24,7 @@ class TestRequests(TestCase):
                                      slots={"Order": {"name": "Order",
                                                       "value": "jump"}})
         r = echopy.handler(order_intent, mock_context)
+        print(r)
         for ek in self.basic_response_keys:
             self.assertIn(ek, r.keys())
         self.assertEqual(r['version'], '1.0')

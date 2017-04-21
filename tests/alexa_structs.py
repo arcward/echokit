@@ -167,9 +167,10 @@ def specific_intent(event):
     order = event.request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
+    card = echopy.SimpleCard(title="Order",
+                             content=f"You wanted me to {order}")
     return Response(output_speech=OutputSpeech(text=response_text),
-                    session_attributes=session_attrs)
-
+                    session_attributes=session_attrs, card=card)
 
 @echopy.fallback
 def unimplemented(event):

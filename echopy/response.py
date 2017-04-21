@@ -98,6 +98,7 @@ class SimpleCard:
             simple_dict['title'] = self.title
         if self.content:
             simple_dict['content'] = self.content
+        return simple_dict
 
 
 class StandardCard:
