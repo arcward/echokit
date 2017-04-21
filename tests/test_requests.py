@@ -7,6 +7,18 @@ class TestRequests(TestCase):
         echopy.application_id = "amzn1.ask.skill.[unique-value-here]"
         self.basic_response_keys = ['version', 'response']
 
+    def test_start_session(self):
+        r = echopy.handler(start_session, mock_context)
+        expected_speech = {'type': 'PlainText',
+                           'text': 'You started a new session!'}
+        self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
+
+    def test_end_session(self):
+        r = echopy.handler(end_session, mock_context)
+        expected_speech = {'type': 'PlainText',
+                           'text': 'You ended our session :['}
+        self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
+
     def test_order_intent(self):
         order_intent = create_intent('OrderIntent', new=False,
                                      slots={"Order": {"name": "Order",
