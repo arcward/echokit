@@ -62,7 +62,7 @@ class ResponseObject:
 
 
 class OutputSpeech:
-    def __init__(self, type='PlainText', text=None, ssml=None):
+    def __init__(self, text=None, ssml=None, type='PlainText', ):
         """
         
         :param type: *PlainText* or *SSML*. If *PlainText*, then 

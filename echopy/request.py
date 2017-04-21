@@ -187,13 +187,14 @@ class System:
         api_endpoint = json_obj.get('apiEndpoint')
         system = System(application, user, device, api_endpoint)
         set_unknown(json_obj, system)
+        return system
 
     def to_json(self):
         sys_dict = {'apiEndpoint': self.api_endpoint}
 
         if self.application:
             sys_dict['application'] = {'applicationId':
-                                           self.application['applicationId']}
+                                       self.application['applicationId']}
 
         if self.user:
             sys_dict['user'] = self.user.to_json()
@@ -326,7 +327,7 @@ class Intent:
         """
         self.name = name
         self.confirmation_status = confirmation_status
-        self.slots: Dict[str, Intent._Slot] = slots
+        self.slots: Dict[str, Slot] = slots
 
     @staticmethod
     def from_json(json_obj):

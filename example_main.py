@@ -50,3 +50,17 @@ def specific_intent(event):
     response_text = f'You asked me to {order}'
     return Response(output_speech=OutputSpeech(text=response_text),
                     session_attributes=session_attrs)
+
+
+# Handles: IntentRequest (unimplemented intent)
+# For example, if 'WeaveBasketIntent' is defined in your
+# interaction model, but you haven't defined a handler
+# for it with @echopy.on_intent('WeaveBasketIntent'),
+# this will catch it. If you don't define your own here,
+# by default echopy will return a "Sorry, I didn't
+# understand your request" speech response.
+@echopy.fallback
+def unimplemented(event):
+    intent_name = event.request.intent.name
+    output_speech = OutputSpeech(f"Sorry, {intent_name} isn't implemented!")
+    return Response(output_speech)

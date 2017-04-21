@@ -1,9 +1,38 @@
 from collections import namedtuple
 from unittest import TestCase
-import json
 import echopy
 from echopy.response import Response, OutputSpeech
 
+
+order_intent = {
+  "session": {
+    "sessionId": "SessionId.a904e546-3b90-43d1-8580-d52da46d8927",
+    "application": {
+      "applicationId": "amzn1.ask.skill.[unique-value-here]"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.[unique-value-here]"
+    },
+    "new": False
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.c10f9d6a-3043-4b24-9356-dc4fb4a8e1fb",
+    "locale": "en-US",
+    "timestamp": "2017-04-21T18:38:14Z",
+    "intent": {
+      "name": "SpecificIntent",
+      "slots": {
+        "Order": {
+          "name": "Order",
+          "value": "jump"
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
 
 request_body = {
   "session": {
@@ -56,7 +85,7 @@ specific_json = {
     },
     "attributes": {},
     "user": {
-      "userId": "amzn1.ask.account.AHZEHE57VH24IGDQSDWNBGJCNLXIKQWUOHENCOWOUGCWSDXTR4UAZYSNELZ6LAQTQC5BAUJRP33YQTZ75G3CC7LLWIPPXAOUWZLL3S5R3CQZDLJQXU5HLRGBUGCELDEJCUZVA74NHYKC3ZRFPGGVDXOUHCQOXE5O4TPRDAGH74CC67YDXU62OL5KVJCLQGK27GKD2NEZSC3UTII"
+      "userId": "amzn1.ask.account.[unique-value-here]"
     },
     "new": True
   },
@@ -73,6 +102,31 @@ specific_json = {
           "value": "jump"
         }
       }
+    }
+  },
+  "version": "1.0"
+}
+
+weird_intent = {
+  "session": {
+    "sessionId": "SessionId.cdf5f865-83ac-408c-a40c-73c6523bd960",
+    "application": {
+      "applicationId": "amzn1.ask.skill.[unique-value-here]"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.[unique-value-here]"
+    },
+    "new": True
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.a76e2587-6ad9-4b95-a66d-e53e9755a10a",
+    "locale": "en-US",
+    "timestamp": "2017-04-21T19:02:58Z",
+    "intent": {
+      "name": "WeirdIntent",
+      "slots": {}
     }
   },
   "version": "1.0"
@@ -111,7 +165,11 @@ class TestRequests(TestCase):
         print(r)
 
     def test_specific_intent(self):
-        r = echopy.handler(specific_json, fake_context)
+        r = echopy.handler(order_intent, fake_context)
+        print(r)
+
+    def test_fallback_inten(self):
+        r = echopy.handler(weird_intent, fake_context)
         print(r)
 
 
