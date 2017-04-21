@@ -8,6 +8,31 @@ from typing import Dict
 
 import echopy
 
+attr_map = {
+    'accessToken': 'access_token',
+    'applicationId': 'application_id',
+    'sessionId': 'session_id',
+    'AudioPlayer': 'audio_player',
+    'System': 'system',
+    'Device': 'device',
+    'deviceId': 'device_id',
+    'supportedInterfaces': 'supported_interfaces',
+    'userId': 'user_id',
+    'apiEndpoint': 'api_endpoint',
+    'requestId': 'request_id',
+    'dialogState': 'dialog_state',
+    'confirmationStatus': 'confirmation_status',
+    'offsetInMilliseconds': 'offset_in_milliseconds',
+    'playerActivity': 'player_activity'
+}
+
+
+def set_unknown(json_obj, model_obj):
+    """Assigns unexpected attributes from JSON structure to model"""
+    for k, v in json_obj.items():
+        if k not in attr_map and k not in model_obj.__dict__:
+            setattr(model_obj, k, v)
+
 Application = namedtuple('Application', 'application_id')
 
 
@@ -37,10 +62,11 @@ class Request:
         if context:
             context = Context.from_json(context)
 
-        return Request(
-            json_obj['version'], Session.from_json(json_obj['session']),
-            context, Request._factory(json_obj['request'])
-        )
+        req = Request(version=json_obj['version'], context=context,
+                      session=Session.from_json(json_obj['session']),
+                      request=Request._factory(json_obj['request']))
+        set_unknown(json_obj, req)
+        return req
 
     @staticmethod
     def _factory(json_request):
@@ -87,8 +113,10 @@ class Session:
         user = User(json_obj['user']['userId'],
                     json_obj['user'].get('accessToken'),
                     json_obj['user'].get('permissions'))
-        return Session(json_obj['sessionId'], json_obj['new'],
-                       json_obj.get('attributes'), app, user)
+        session = Session(json_obj['sessionId'], json_obj['new'],
+                          json_obj.get('attributes'), app, user)
+        set_unknown(json_obj, session)
+        return session
 
 
 class Context:
@@ -110,7 +138,9 @@ class Context:
         audio_player = json_obj.get('AudioPlayer')
         if audio_player:
             audio_player = AudioPlayer.from_json(audio_player)
-        return Context(system, audio_player)
+        context = Context(system, audio_player)
+        set_unknown(json_obj, system)
+        return context
 
     def to_json(self):
         context_dict = {'System': self.system.to_json()}
@@ -155,7 +185,8 @@ class System:
                                     device.get('supportedInterfaces'))
 
         api_endpoint = json_obj.get('apiEndpoint')
-        return System(application, user, device, api_endpoint)
+        system = System(application, user, device, api_endpoint)
+        set_unknown(json_obj, system)
 
     def to_json(self):
         sys_dict = {'apiEndpoint': self.api_endpoint}
@@ -204,8 +235,11 @@ class LaunchRequest:
 
     @staticmethod
     def from_json(json_obj):
-        return LaunchRequest(json_obj['requestId'], json_obj['timestamp'],
-                             json_obj['locale'])
+        launch_request = LaunchRequest(json_obj['requestId'],
+                                       json_obj['timestamp'],
+                                       json_obj['locale'])
+        set_unknown(json_obj, launch_request)
+        return launch_request
 
 
 class SessionEndedRequest:
@@ -237,11 +271,13 @@ class SessionEndedRequest:
     def from_json(json_obj):
         error = SessionEndedRequest._Error(json_obj.get('type'),
                                            json_obj.get('message'))
-        return SessionEndedRequest(json_obj['requestId'],
-                                   json_obj['timestamp'],
-                                   json_obj['locale'],
-                                   json_obj.get('dialogState'),
-                                   error)
+        end_request = SessionEndedRequest(json_obj['requestId'],
+                                          json_obj['timestamp'],
+                                          json_obj['locale'],
+                                          json_obj.get('dialogState'),
+                                          error)
+        set_unknown(json_obj, end_request)
+        return end_request
 
 
 class IntentRequest:
@@ -266,9 +302,13 @@ class IntentRequest:
 
     @staticmethod
     def from_json(json_obj):
-        return IntentRequest(json_obj['requestId'], json_obj['timestamp'],
-                             json_obj['locale'], json_obj.get('dialogState'),
-                             Intent.from_json(json_obj['intent']))
+        intent_request = IntentRequest(json_obj['requestId'],
+                                       json_obj['timestamp'],
+                                       json_obj['locale'],
+                                       json_obj.get('dialogState'),
+                                       Intent.from_json(json_obj['intent']))
+        set_unknown(json_obj, intent_request)
+        return intent_request
 
 
 class Intent:
@@ -294,8 +334,10 @@ class Intent:
         slots = {}
         for k, v in json_slots.items():
             slots[k] = Slot.from_json(v)
-        return Intent(json_obj['name'], json_obj.get('confirmationStatus'),
-                      slots)
+        intent = Intent(json_obj['name'], json_obj.get('confirmationStatus'),
+                        slots)
+        set_unknown(json_obj, intent)
+        return intent
 
 
 class Slot:
@@ -315,8 +357,10 @@ class Slot:
 
     @staticmethod
     def from_json(json_obj):
-        return Slot(json_obj.get('name'), json_obj.get('value'),
+        slot = Slot(json_obj.get('name'), json_obj.get('value'),
                     json_obj.get('confirmationStatus'))
+        set_unknown(json_obj, slot)
+        return slot
 
 
 class AudioPlayer:
@@ -327,9 +371,11 @@ class AudioPlayer:
 
     @staticmethod
     def from_json(json_obj):
-        return AudioPlayer(json_obj.get('token'),
-                           json_obj.get('offsetInMilliseconds'),
-                           json_obj.get('playerActivity'))
+        audio_player = AudioPlayer(json_obj.get('token'),
+                                   json_obj.get('offsetInMilliseconds'),
+                                   json_obj.get('playerActivity'))
+        set_unknown(json_obj, audio_player)
+        return audio_player
 
     def to_json(self):
         ap_dict = {

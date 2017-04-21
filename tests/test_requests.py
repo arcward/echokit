@@ -1,11 +1,8 @@
-import os
 from collections import namedtuple
 from unittest import TestCase
 import json
 import echopy
-from configparser import ConfigParser
 from echopy.response import Response, OutputSpeech
-
 
 
 request_body = {
@@ -55,7 +52,7 @@ specific_json = {
   "session": {
     "sessionId": "SessionId.002ea470-a416-408c-ac1e-7bfed95fe882",
     "application": {
-      "applicationId": "amzn1.ask.skill.8e45280b-d9ce-4a48-a1c9-f77f07925a14"
+      "applicationId": "amzn1.ask.skill.[unique-value-here]"
     },
     "attributes": {},
     "user": {
@@ -107,16 +104,10 @@ def specific_intent(event):
 
 class TestRequests(TestCase):
     def setUp(self):
-        cfgp = ConfigParser()
-        cfgp.read(os.path.join(os.path.dirname(__file__), 'skill/config.ini'))
-        app_id = cfgp.get('alexa', 'app_id')
-        echopy.application_id = app_id
-
-        self.json_str = json.dumps(request_body)
-        self.json_dict = json.loads(self.json_str)
+        echopy.application_id = "amzn1.ask.skill.[unique-value-here]"
 
     def test_handler(self):
-        r = echopy.handler(self.json_dict, fake_context)
+        r = echopy.handler(request_body, fake_context)
         print(r)
 
     def test_specific_intent(self):
