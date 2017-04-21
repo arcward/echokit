@@ -19,17 +19,12 @@ The top of your main module should have:
 
     import echopy
 
-
+    # Set as your skill's handler in Lambda
     def handler(event, context):
         return echopy.handler(event, context)
 
+    # Set as your application ID from the Alexa dev portal
     echopy.application_id = "your_application_id"
-
-Set ``example_main.handler`` as your skill's handler in the Lambda
-console (or whatever your module is named).
-
-Set ``echopy.application_id`` as your skill's app ID, as found in the Alexa
-dev portal.
 
 There are decorators for the three basic requests Alexa skills need to
 handle:
