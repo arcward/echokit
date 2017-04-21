@@ -5,8 +5,11 @@ https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-
 """
 from collections import namedtuple
 from typing import Dict
-
+import logging
 import echopy
+
+
+logger = logging.getLogger(__name__)
 
 attr_map = {
     'accessToken': 'access_token',
@@ -52,9 +55,11 @@ class Request:
         self.request = request
 
         if self.session.application.application_id != echopy.application_id:
-            raise Exception(f"Expected appID {echopy.application_id} "
-                            f"but received "
-                            f"{self.session.application.application_id}")
+            msg = (f"Received application ID doesn't match. "
+                   f"Expected: {echopy.application_id} "
+                   f"Received: {self.session.application.application_id}")
+            logger.warning(msg)
+            raise Exception(msg)
 
     @staticmethod
     def from_json(json_obj):
