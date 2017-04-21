@@ -30,10 +30,20 @@ class TestRequests(TestCase):
         self.assertEqual(r['version'], '1.0')
 
         expected_attrs = {'last_order': 'jump'}
+
         self.assertDictEqual(expected_attrs, r['sessionAttributes'])
 
         expected_speech = {'type': 'PlainText', 'text': 'You asked me to jump'}
         self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
+
+        expected_card = {'type': 'Standard',
+                         'title': 'Order',
+                         'text': 'You wanted me to jump',
+                         'image': {
+                             'smallImageUrl': 'http://i.imgur.com/PytSZCG.png',
+                             'largeImageUrl': 'http://i.imgur.com/PytSZCG.png'
+                         }}
+        self.assertDictEqual(expected_card, r['response']['card'])
 
     def test_some_intent(self):
         some_intent = create_intent('SomeIntent', new=False)

@@ -167,8 +167,11 @@ def specific_intent(event):
     order = event.request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
-    card = echopy.SimpleCard(title="Order",
-                             content=f"You wanted me to {order}")
+    img_url = "http://i.imgur.com/PytSZCG.png"
+    card = echopy.StandardCard(title="Order",
+                               text=f"You wanted me to {order}",
+                               small_image_url=img_url,
+                               large_image_url=img_url)
     return Response(output_speech=OutputSpeech(text=response_text),
                     session_attributes=session_attrs, card=card)
 
