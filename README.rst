@@ -34,10 +34,9 @@ dev portal.
 There are decorators for the three basic requests Alexa skills need to
 handle:
 
-- ``LaunchRequest`` : ``@echopy.on_session_launch`` :
-- ``SessionEndedRequest`` : ``@echopy.on_session_end``
-- ``IntentRequest`` : ``@echopy.on_intent('some_intent')`` and
-    ``@echopy.fallback``
+- ``LaunchRequest``: ``@echopy.on_session_launch`` :
+- ``SessionEndedRequest``: ``@echopy.on_session_end``
+- ``IntentRequest``: ``@echopy.on_intent('some_intent')`` and ``@echopy.fallback``
 
 ``@echopy.fallback`` is used for cases where you receive a request for
 an intent that doesn't yet have a function to handle it.
