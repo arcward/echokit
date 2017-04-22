@@ -1,3 +1,4 @@
+"""Command-line utility to create Lambda deployment ZIP files"""
 import argparse
 import os
 import echopy

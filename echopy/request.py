@@ -1,7 +1,6 @@
 """Models of objects in requests received from the Alexa service
 
 https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interface-reference#session-object
-
 """
 from collections import namedtuple
 from typing import Dict
@@ -54,12 +53,15 @@ class Request:
         self.context = context
         self.request = request
 
-        if self.session.application.application_id != echopy.application_id:
-            msg = (f"Received application ID doesn't match. "
-                   f"Expected: {echopy.application_id} "
-                   f"Received: {self.session.application.application_id}")
-            logger.warning(msg)
-            raise Exception(msg)
+        # Set in ``echopy.verify_application_id`` and ``echopy.application_id``
+        if echopy.verify_application_id:
+            app_id = self.session.application.application_id
+            if app_id != echopy.application_id:
+                msg = (f"Received application ID doesn't match. "
+                       f"Expected: {echopy.application_id} "
+                       f"Received: {app_id}")
+                logger.error(msg)
+                raise Exception(msg)
 
     @staticmethod
     def from_json(json_obj):

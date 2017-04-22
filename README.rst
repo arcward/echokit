@@ -9,8 +9,8 @@ Python 3.6-compatible SDK for Alexa Skills Kit
 
     > python setup.py install
 
-Example
-=======
+Basics
+======
 See ``example_main.py``
 
 The top of your main module should have:

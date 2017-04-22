@@ -1,3 +1,4 @@
+"""Handles initial requests/logging"""
 import logging
 from echopy.request import Request
 from echopy.response import Response, OutputSpeech, SimpleCard, \
@@ -7,14 +8,19 @@ from echopy.response import Response, OutputSpeech, SimpleCard, \
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+#: Skill's application ID, found in the Alexa dev portal
 application_id = None
-
-request_handlers = {}
+#: If True, logs error/raises exception a request's application ID
+#: doesn't match ``echopy.application_id``
+verify_application_id = True
 
 
 def fallback_default(event):
+    """Default handler for valid intent names without handlers"""
     output_speech = OutputSpeech("Sorry, I didn't understand your request")
     return Response(output_speech=output_speech)
+
+request_handlers = {'fallback': fallback_default}
 
 
 def handler(event, context):
@@ -34,17 +40,15 @@ def handler(event, context):
 
     event = Request.from_json(event)
     if event.request.request_type == 'IntentRequest':
-        # Recognized intent name and handler function
         intent_name = event.request.intent.name
         logger.info(f"Received intent: {intent_name}")
+        # Recognized intent name and handler function
         if intent_name in request_handlers:
             resp = request_handlers.get(intent_name)
+        #: Recognized intent name, but no handler function
         else:
-            # Handle intents without registered handlers
-            logger.info(f"Unexpected intent {intent_name}, falling back")
+            logger.info(f"Unexpected intent '{intent_name}', falling back")
             resp = request_handlers.get('fallback')
-            if not resp:
-                resp = fallback_default
     else:
         # Other requests are LaunchRequest and SessionEndedRequest
         resp = request_handlers.get(event.request.request_type)
@@ -52,6 +56,12 @@ def handler(event, context):
     logger.info(f"Response: {resp_json}")
     return resp_json
 
+
+# Decorators to register functions to handle requests. Ex:
+#   @echopy.on_session_launch
+#   def begin_session(event):
+#       output_speech = echopy.OutputSpeech(text="You started a new session!")
+#       return echopy.Response(output_speech=output_speech)
 
 def on_session_launch(func):
     request_handlers['LaunchRequest'] = func
