@@ -45,7 +45,6 @@ Handling requests
 =================
 There are `three basic request types`_ to handle. In turn, echopy has
 four decorators to make that easy:
-
  - ``@echopy.on_session_launch`` for *LaunchRequest*
  - ``@echopy.on_session_end`` for *SessionEndedRequest*
  - ``@echopy.on_intent(intent_name)`` for an *IntentRequest* matching
@@ -59,7 +58,6 @@ be the ``echopy.Request`` object, through which you can access the
 ``Session`` and ``Context`` objects, as well at the request from the Alexa
 service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
 objects).
-
 
 Sending responses
 =================
@@ -75,7 +73,6 @@ Request handlers should return ``echopy.Response``, for which you can set:
 
 Example
 =======
-
 .. code-block:: python
 
     import echopy
