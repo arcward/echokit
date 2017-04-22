@@ -1,7 +1,0 @@
-HoursIntent are you open
-HoursIntent when are you open
-HoursIntent what are your hours
-OrderIntent order {MENU_ITEM}
-OrderIntent I'll have {MENU_ITEM}
-CancelIntent cancel order
-CancelIntent cancel my order
