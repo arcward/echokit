@@ -49,6 +49,7 @@ four decorators to make that easy:
  - ``@echopy.on_session_end`` for *SessionEndedRequest*
  - ``@echopy.on_intent(intent_name)`` for an *IntentRequest* matching
    ``intent_name``
+   
    + ``@echopy.fallback`` for intent requests without a handler specified
      by ``@echopy.on_intent()``
 
@@ -66,6 +67,7 @@ Request handlers should return ``echopy.Response``, for which you can set:
  - Session attributes (as ``dict[str, object]``)
  - A reprompt: ``echopy.Reprompt``
  - A card to display:
+ 
    + ``SimpleCard``
    + ``StandardCard``
    + ``LinkAccountCard``
