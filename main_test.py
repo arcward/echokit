@@ -8,7 +8,7 @@ def handler(event, context):
     return echopy.handler(event, context)
 
 # Your skill ID, as provided in the Alexa dev portal
-echopy.application_id = "some_app_id"
+echopy.application_id = "amzn1.ask.skill.6188e162-d7e3-451b-9078-6399f1916373"
 
 
 # All apps are required to handle three basic requests,
@@ -48,7 +48,10 @@ def specific_intent(event):
     order = event.request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
-    card = echopy.SimpleCard(title="Order", content=response_text)
+    img_url = "https://i.imgur.com/PytSZCG.png"
+    card = echopy.StandardCard(title="Order",
+                               text=f"You wanted me to {order}",
+                               large_image_url=img_url)
     return Response(output_speech=OutputSpeech(text=response_text),
                     session_attributes=session_attrs, card=card)
 
@@ -65,3 +68,4 @@ def unimplemented(event):
     intent_name = event.request.intent.name
     output_speech = OutputSpeech(f"Sorry, {intent_name} isn't implemented!")
     return Response(output_speech)
+

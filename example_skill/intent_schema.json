@@ -1,0 +1,19 @@
+{
+  "intents": [
+    {
+      "intent": "OrderIntent",
+      "slots": [
+        {
+          "name": "MenuItem",
+          "type": "MENU_ITEM"
+        }
+      ]
+    },
+    {
+      "intent": "HoursIntent"
+    },
+    {
+      "intent": "CancelIntent"
+    }
+  ]
+}

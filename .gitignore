@@ -97,5 +97,5 @@ ENV/
 
 .idea/
 tests/skill/
-main.py
+main_test.py
 *.zip
