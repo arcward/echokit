@@ -3,8 +3,13 @@ echopy
 ======
 A **Python 3.6** SDK for the Alexa Skills Kit
 
+Sample
+======
+A sample skill using echopy:
+https://github.com/arcward/echopy-example
+
 Installation
-------------
+============
 Requirements:
  - ``Python >= 3.6`` (that's it!)
 
@@ -14,13 +19,9 @@ Clone/download the repo, and run this from the ``echopy/`` directory:
 
     $ python setup.py install
 
-Sample
-------
-A sample skill using echopy:
-https://github.com/arcward/echopy-example
-
+===============
 Getting Started
----------------
+===============
 When you configure your Lambda function, you need to specify a handler_. And
 when you configure your skill in the `Alexa dev portal`_, you'll be provided
 an application ID for your skill. To provide these, the top of your module
@@ -41,7 +42,7 @@ If your module is ``main.py``, in your Lambda configuration, you'd set
 ``main.handler`` as your handler.
 
 Handling requests
-^^^^^^^^^^^^^^^^^
+=================
 There are `three basic request types`_ to handle. In turn, echopy has
 four decorators to make that easy:
 
@@ -61,7 +62,7 @@ objects).
 
 
 Sending responses
-^^^^^^^^^^^^^^^^^
+=================
 Request handlers should return ``echopy.Response``, for which you can set:
  - Output speech: ``echopy.OutputSpeech``
  - Session attributes (as ``dict[str, object]``)
@@ -73,7 +74,7 @@ Request handlers should return ``echopy.Response``, for which you can set:
    + ``LinkAccountCard``
 
 Example
-^^^^^^^
+=======
 
 .. code-block:: python
 
@@ -104,11 +105,11 @@ Example
                         session_attributes={'last_ordered': menu_item})
 
 Creating a Lambda deployment package
-------------------------------------
+====================================
 For reference, see the `official docs`_.
 
 echodist
-^^^^^^^^
+--------
 ``echodist`` is a script included to automatically create ZIP deployment
 packages. If you installed via *setup.py*, you can run it from the command
 line (try ``echodist --help``).
@@ -126,7 +127,7 @@ ran the command). If you unzip it, you can see it includes the entire
 subtree of the directory you specified, as well as an ``echopy/`` directory.
 
 Manually
-^^^^^^^^
+--------
 Your ZIP file should be created from within your top-level package (don't
 just zip the enclosing directory). You'll need to download/clone echopy
 and include ``echopy/`` in in that same top-level directory. So if your
