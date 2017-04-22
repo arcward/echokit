@@ -19,7 +19,7 @@ verify_application_id = True
 def fallback_default(request, session):
     """Default handler for valid intent names without handlers"""
     speech = PlainTextOutputSpeech("Sorry, I didn't understand your request")
-    return ResponseWrapper(output_speech=speech)
+    return Response(output_speech=speech)
 
 request_handlers = {'fallback': fallback_default}
 
@@ -29,8 +29,8 @@ def handler(event, context):
     
     :param event: Contains data on the Alexa request, used to 
         create ``echopy.request.RequestWrapper``
-    :param context: RequestWrapper context, used primarily for logging. **Note**: 
-        *Not* the same as ``echopy.request.Context``
+    :param context: RequestWrapper context, used primarily for logging. 
+        **Note**: *Not* the same as ``echopy.request.Context``
     :return: Dict of ``echopy.response.ResponseWrapper`` object
     """
     logger.info(f"Received event: {event}")
@@ -44,29 +44,30 @@ def handler(event, context):
     session = event.session
 
     if request.request_type == 'IntentRequest':
-        intent_name = request.intent.name
-        logger.info(f"Received intent: {intent_name}")
+        logger.info(f"Received intent: {request.intent.name}")
         # Recognized intent name and handler function
-        if intent_name in request_handlers:
-            resp = request_handlers.get(intent_name)
+        if request.intent.name in request_handlers:
+            resp = request_handlers.get(request.intent.name)
         #: Recognized intent name, but no handler function
         else:
-            logger.info(f"Unexpected intent '{intent_name}', falling back")
+            logger.debug(f"Unexpected intent '{request.intent.name}', "
+                         f"falling back")
             resp = request_handlers.get('fallback')
     else:
         # Other requests are LaunchRequest and SessionEndedRequest
         resp = request_handlers.get(request.request_type)
+
+    # Final return to Alexa service
     resp_json = resp(request, session).to_json()
-    logger.info(f"ResponseWrapper: {resp_json}")
+    logger.info(f"Response: {resp_json}")
     return resp_json
 
 
 # Decorators to register functions to handle requests. Ex:
 #   @echopy.on_session_launch
-#   def begin_session(event):
-#       output_speech = echopy.OutputSpeech(text="You started a new session!")
-#       return echopy.ResponseWrapper(output_speech=output_speech)
-
+#   def begin_session(request, session):
+#       speech = echopy.PlainTextOutputSpeech("You started a new session!")
+#       return echopy.Response(output_speech=speech)
 def on_session_launch(func):
     request_handlers['LaunchRequest'] = func
 
@@ -84,4 +85,4 @@ def on_intent(intent_name):
 def fallback(func):
     request_handlers['fallback'] = func
 
-__all__ = ['request', 'response']
+__all__ = ['request_models', 'response_models']

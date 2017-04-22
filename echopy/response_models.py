@@ -12,20 +12,25 @@ class Response:
                  should_end_session=None, directives=None,
                  session_attributes=None, version='1.0'):
         """
-        :param response: ``Response``
-        :param session_attributes: dict of session attributes
+        
+        :param output_speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
+        :param card: ``SimpleCard``, ``StandardCard`` or ``LinkAccountCard``
+        :param reprompt: ``Reprompt``
+        :param should_end_session:  ``True`` or ``False``
+        :param directives: List of directives
+        :param session_attributes: dict of session attributes [str, object]
         :param version: Default: *1.0*
         """
         self.response: _Response = _Response(output_speech, card, reprompt,
                                              should_end_session, directives)
         self.version: str = version
-
         if not session_attributes:
             session_attributes = {}
         self.session_attributes: Dict[str, object] = session_attributes
 
     @property
     def output_speech(self):
+        """``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``"""
         return self.response.output_speech
 
     @output_speech.setter
@@ -34,6 +39,7 @@ class Response:
 
     @property
     def card(self):
+        """``SimpleCard``, ``StandardCard`` or ``LinkAccountCard``"""
         return self.response.card
 
     @card.setter
@@ -42,6 +48,7 @@ class Response:
 
     @property
     def reprompt(self):
+        """``Reprompt``"""
         return self.response.reprompt
 
     @reprompt.setter
@@ -50,6 +57,7 @@ class Response:
 
     @property
     def should_end_session(self):
+        """``True`` or ``False``"""
         return self.response.should_end_session
 
     @should_end_session.setter
@@ -58,6 +66,7 @@ class Response:
 
     @property
     def directives(self):
+        """List of directives"""
         return self.response.directives
 
     @directives.setter
@@ -90,18 +99,16 @@ class _Response:
         self.directives: list[object] = directives
 
     def to_json(self):
-        response_dict = {'shouldEndSession': self.should_end_session,
-                         'directives': self.directives}
-
+        response_dict = {
+            'shouldEndSession': self.should_end_session,
+            'directives': self.directives
+        }
         if self.output_speech:
             response_dict['outputSpeech'] = self.output_speech.to_json()
-
         if self.card:
             response_dict['card'] = self.card.to_json()
-
         if self.reprompt:
             response_dict['reprompt'] = self.reprompt.to_json()
-
         return {k: v for (k, v) in response_dict.items() if v is not None}
 
 
@@ -125,9 +132,8 @@ class SSMLOutputSpeech:
 
 class SimpleCard:
     """Simple card, supporting only *title* and *content*"""
-    type = 'Simple'
-
     def __init__(self, title=None, content=None):
+        self.type = 'Simple'
         self.title = title
         self.content = content
 
@@ -137,10 +143,9 @@ class SimpleCard:
 
 class StandardCard:
     """Standard card, supporting title/text and a (small/large) image"""
-    type = 'Standard'
-
     def __init__(self, title=None, text=None, small_image_url=None,
                  large_image_url=None):
+        self.type = 'Standard'
         self.title = title
         self.text = text
         self.small_image_url = small_image_url
@@ -171,9 +176,8 @@ class StandardCard:
 
 class LinkAccountCard:
     """LinkAccount card, supporting only *content*"""
-    type = 'LinkAccount'
-
     def __init__(self, content=None):
+        self.type = 'LinkAccount'
         self.content = content
 
     def to_json(self):

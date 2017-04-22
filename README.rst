@@ -3,8 +3,13 @@ echopy
 ======
 A **Python 3.6** SDK for the Alexa Skills Kit
 
+Sample
+======
+A sample skill using echopy:
+https://github.com/arcward/echopy-example
+
 Installation
-------------
+============
 Requirements:
  - ``Python >= 3.6`` (that's it!)
 
@@ -14,13 +19,9 @@ Clone/download the repo, and run this from the ``echopy/`` directory:
 
     $ python setup.py install
 
-Sample
-------
-A sample skill using echopy:
-https://github.com/arcward/echopy-example
-
+===============
 Getting Started
----------------
+===============
 When you configure your Lambda function, you need to specify a handler_. And
 when you configure your skill in the `Alexa dev portal`_, you'll be provided
 an application ID for your skill. To provide these, the top of your module
@@ -31,9 +32,7 @@ should look like this:
     import echopy
 
     # Set as your skill's handler in Lambda
-    def handler(event, context):
-        return echopy.handler(event, context)
-
+    handler = echopy.handler
     # Set as your application ID from the Alexa dev portal
     echopy.application_id = "your_application_id"
 
@@ -41,74 +40,68 @@ If your module is ``main.py``, in your Lambda configuration, you'd set
 ``main.handler`` as your handler.
 
 Handling requests
-^^^^^^^^^^^^^^^^^
+=================
 There are `three basic request types`_ to handle. In turn, echopy has
 four decorators to make that easy:
-
  - ``@echopy.on_session_launch`` for *LaunchRequest*
- - ``@echopy.on_session_end`` for *SessionEndedRequest*
+ - ``@echopy.on_session_ended`` for *SessionEndedRequest*
  - ``@echopy.on_intent(intent_name)`` for an *IntentRequest* matching
    ``intent_name``
-   
+
    + ``@echopy.fallback`` for intent requests without a handler specified
      by ``@echopy.on_intent()``
 
-Functions with these decorators should take a single argument, which will
-be the ``echopy.RequestWrapper`` object, through which you can access the
-``Session`` and ``Context`` objects, as well at the request from the Alexa
-service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
-objects).
-
+Functions with these decorators should take two arguments, one for
+the ``Request`` object and one for the ``Session`` object.
+The request object will either be a ``LaunchRequest``, ``SessionEndedRequest``
+or ``IntentRequest``.
 
 Sending responses
-^^^^^^^^^^^^^^^^^
-RequestWrapper handlers should return ``echopy.ResponseWrapper``, for which you can set:
- - Output speech: ``echopy.OutputSpeech``
+=================
+Request handlers should return ``Response``, for which you can set:
+ - Output speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
  - Session attributes (as ``dict[str, object]``)
- - A reprompt: ``echopy.Reprompt``
+ - A reprompt: ``Reprompt``
  - A card to display:
- 
+
    + ``SimpleCard``
    + ``StandardCard``
    + ``LinkAccountCard``
 
 Example
-^^^^^^^
-
+=======
 .. code-block:: python
 
     import echopy
-    from echopy import ResponseWrapper, OutputSpeech, SimpleCard
+    from echopy import Response, PlainTextOutputSpeech, SimpleCard
 
-    def handler(event, context):
-        return echopy.handler(event, context)
-
+    handler = echopy.handler
     echopy.application_id = "my_app_id"
 
     @echopy.on_session_started
-    def start_session(event):
-        output_speech = OutputSpeech(text="Hello!")
-        return ResponseWrapper(output_speech=output_speech)
+    def start_session(request, session):
+        output_speech = PlainTextOutputSpeech("Hello!")
+        return Response(output_speech=output_speech)
 
-    @echopy.on_session_end
-    def end_session(event):
-        output_speech = OutputSpeech(text="Goodbye!")
+    @echopy.on_session_ended
+    def end_session(request, session):
+        output_speech = PlainTextOutputSpeech("Goodbye!")
         simple_card = SimpleCard(title="Goodbye", content="Seeya!")
-        return ResponseWrapper(output_speech=output_speech, card=simple_card)
+        return Response(output_speech=output_speech, card=simple_card)
 
     @echopy.on_intent('OrderIntent')
-    def send_order(event):
-        menu_item = event.request.intent.slots['MenuItem'].value
-        output_speech = OutputSpeech(text=f"You ordered a {menu_item}")
-        return ResponseWrapper(output_speech=output_speech,
+    def send_order(request, session):
+        menu_item = request.intent.slots['MenuItem'].value
+        output_speech = PlainTextOutputSpeech(f"You ordered a {menu_item}")
+        return Response(output_speech=output_speech,
                         session_attributes={'last_ordered': menu_item})
 
 Creating a Lambda deployment package
-------------------------------------
+====================================
 For reference, see the `official docs`_.
 
 echodist
-^^^^^^^^
+--------
 ``echodist`` is a script included to automatically create ZIP deployment
 packages. If you installed via *setup.py*, you can run it from the command
 line (try ``echodist --help``).
@@ -126,7 +119,7 @@ ran the command). If you unzip it, you can see it includes the entire
 subtree of the directory you specified, as well as an ``echopy/`` directory.
 
 Manually
-^^^^^^^^
+--------
 Your ZIP file should be created from within your top-level package (don't
 just zip the enclosing directory). You'll need to download/clone echopy
 and include ``echopy/`` in in that same top-level directory. So if your
