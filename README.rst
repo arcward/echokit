@@ -54,7 +54,7 @@ four decorators to make that easy:
      by ``@echopy.on_intent()``
 
 Functions with these decorators should take a single argument, which will
-be the ``echopy.Request`` object, through which you can access the
+be the ``echopy.RequestWrapper`` object, through which you can access the
 ``Session`` and ``Context`` objects, as well at the request from the Alexa
 service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
 objects).
@@ -62,7 +62,7 @@ objects).
 
 Sending responses
 ^^^^^^^^^^^^^^^^^
-Request handlers should return ``echopy.Response``, for which you can set:
+RequestWrapper handlers should return ``echopy.ResponseWrapper``, for which you can set:
  - Output speech: ``echopy.OutputSpeech``
  - Session attributes (as ``dict[str, object]``)
  - A reprompt: ``echopy.Reprompt``
@@ -78,7 +78,7 @@ Example
 .. code-block:: python
 
     import echopy
-    from echopy import Response, OutputSpeech, SimpleCard
+    from echopy import ResponseWrapper, OutputSpeech, SimpleCard
 
     def handler(event, context):
         return echopy.handler(event, context)
@@ -88,19 +88,19 @@ Example
     @echopy.on_session_started
     def start_session(event):
         output_speech = OutputSpeech(text="Hello!")
-        return Response(output_speech=output_speech)
+        return ResponseWrapper(output_speech=output_speech)
 
     @echopy.on_session_end
     def end_session(event):
         output_speech = OutputSpeech(text="Goodbye!")
         simple_card = SimpleCard(title="Goodbye", content="Seeya!")
-        return Response(output_speech=output_speech, card=simple_card)
+        return ResponseWrapper(output_speech=output_speech, card=simple_card)
 
     @echopy.on_intent('OrderIntent')
     def send_order(event):
         menu_item = event.request.intent.slots['MenuItem'].value
         output_speech = OutputSpeech(text=f"You ordered a {menu_item}")
-        return Response(output_speech=output_speech,
+        return ResponseWrapper(output_speech=output_speech,
                         session_attributes={'last_ordered': menu_item})
 
 Creating a Lambda deployment package

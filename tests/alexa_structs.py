@@ -1,6 +1,6 @@
 from collections import namedtuple
 import echopy
-from echopy.response import Response, OutputSpeech
+from echopy import Response, PlainTextOutputSpeech
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
                                 'aws_request_id memory_limit_in_mb')
@@ -145,38 +145,41 @@ def create_intent(intent_name, new=True, slots=None, attributes=None,
 
 
 @echopy.on_session_launch
-def session_started(event):
-    output_speech = OutputSpeech(text="You started a new session!")
+def session_started(request, session):
+    output_speech = PlainTextOutputSpeech("You started a new session!")
     return Response(output_speech=output_speech)
 
 
 @echopy.on_session_end
-def session_ended(event):
-    output_speech = OutputSpeech("You ended our session :[")
+def session_ended(request, session):
+    output_speech = PlainTextOutputSpeech("You ended our session :[")
     return Response(output_speech=output_speech)
 
 
 @echopy.on_intent('SomeIntent')
-def on_intent(event):
-    output_speech = OutputSpeech(text="I did something with SomeIntent!")
+def on_intent(request, session):
+    output_speech = PlainTextOutputSpeech("I did something with SomeIntent!")
     return Response(output_speech=output_speech)
 
 
 @echopy.on_intent('OrderIntent')
-def specific_intent(event):
-    order = event.request.intent.slots['Order'].value
+def specific_intent(request, session):
+    order = request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
-    img_url = "http://i.imgur.com/PytSZCG.png"
-    card = echopy.StandardCard(title="Order",
-                               text=f"You wanted me to {order}",
-                               small_image_url=img_url,
-                               large_image_url=img_url)
-    return Response(output_speech=OutputSpeech(text=response_text),
+    card = echopy.StandardCard(
+        title="Order",
+        text=response_text,
+        small_image_url="http://i.imgur.com/PytSZCG.png",
+        large_image_url="http://i.imgur.com/PytSZCG.png"
+    )
+    return Response(output_speech=PlainTextOutputSpeech(response_text),
                     session_attributes=session_attrs, card=card)
 
+
 @echopy.fallback
-def unimplemented(event):
-    intent_name = event.request.intent.name
-    output_speech = OutputSpeech(f"Sorry, {intent_name} isn't implemented!")
+def unimplemented(request, session):
+    intent_name = request.intent.name
+    output_speech = PlainTextOutputSpeech(f"Sorry, {intent_name} isn't "
+                                          f"implemented!")
     return Response(output_speech)

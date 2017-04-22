@@ -38,7 +38,7 @@ class TestRequests(TestCase):
 
         expected_card = {'type': 'Standard',
                          'title': 'Order',
-                         'text': 'You wanted me to jump',
+                         'text': 'You asked me to jump',
                          'image': {
                              'smallImageUrl': 'http://i.imgur.com/PytSZCG.png',
                              'largeImageUrl': 'http://i.imgur.com/PytSZCG.png'

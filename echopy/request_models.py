@@ -2,14 +2,14 @@
 
 https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interface-reference#session-object
 """
+import logging
 from collections import namedtuple
 from typing import Dict
-import logging
+
 import echopy
 
-
 logger = logging.getLogger(__name__)
-
+Application = namedtuple('Application', 'application_id')
 attr_map = {
     'accessToken': 'access_token',
     'applicationId': 'application_id',
@@ -35,18 +35,17 @@ def set_unknown(json_obj, model_obj):
         if k not in attr_map and k not in model_obj.__dict__:
             setattr(model_obj, k, v)
 
-Application = namedtuple('Application', 'application_id')
 
+class RequestWrapper:
+    """RequestWrapper model (``event`` in ``echopy.handler(event, context)``"""
 
-class Request:
-    """Request model (``event`` in ``echopy.handler(event, context)``"""
     def __init__(self, version, session, context, request):
         """
         
         :param version: 
         :param session: ``Session`` object
         :param context: ``Context`` object
-        :param request: ``Request`` object
+        :param request: ``RequestWrapper`` object
         """
         self.version = version
         self.session = session
@@ -69,9 +68,11 @@ class Request:
         if context:
             context = Context.from_json(context)
 
-        req = Request(version=json_obj['version'], context=context,
-                      session=Session.from_json(json_obj['session']),
-                      request=Request._factory(json_obj['request']))
+        req = RequestWrapper(
+            version=json_obj['version'], context=context,
+            session=Session.from_json(json_obj['session']),
+            request=RequestWrapper._factory(json_obj['request'])
+        )
         set_unknown(json_obj, req)
         return req
 
@@ -97,6 +98,7 @@ class Session:
     
     Not included for requests from ``AudioPlayer`` and others
     """
+
     def __init__(self, session_id, new, attributes, application, user):
         """
         
@@ -128,9 +130,9 @@ class Session:
 
 class Context:
     """Data on the current state of the Alexa service/device"""
+
     def __init__(self, system, audio_player):
         """
-        
         :param system: ``System`` object
         :param audio_player: ``AudioPlayer`` object
         """
@@ -321,6 +323,7 @@ class IntentRequest:
 
 class Intent:
     """Intent provided in ``IntentRequest``"""
+
     def __init__(self, name, confirmation_status, slots):
         """
         
@@ -350,6 +353,7 @@ class Intent:
 
 class Slot:
     """``Slot`` present in ``Intent.slots``"""
+
     def __init__(self, name, value, confirmation_status):
         """
         
