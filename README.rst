@@ -51,6 +51,7 @@ four decorators to make that easy:
    + ``@echopy.fallback`` for intent requests without a handler specified
      by ``@echopy.on_intent()``
 
+<<<<<<< HEAD
 Functions with these decorators should take two arguments, one for
 the ``Request`` object and one for the ``Session`` object.
 The request object will either be a ``LaunchRequest``, ``SessionEndedRequest``
@@ -60,6 +61,18 @@ Sending responses
 =================
 Request handlers should return ``Response``, for which you can set:
  - Output speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
+=======
+Functions with these decorators should take a single argument, which will
+be the ``echopy.Request`` object, through which you can access the
+``Session`` and ``Context`` objects, as well at the request from the Alexa
+service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
+objects).
+
+Sending responses
+=================
+Request handlers should return ``echopy.Response``, for which you can set:
+ - Output speech: ``echopy.OutputSpeech``
+>>>>>>> 75c6cc9e65ee6a5b245a087ff12819900d2abd0e
  - Session attributes (as ``dict[str, object]``)
  - A reprompt: ``Reprompt``
  - A card to display:
