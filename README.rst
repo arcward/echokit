@@ -1,11 +1,21 @@
-======
-echopy
-======
-A **Python 3.6** SDK for the Alexa Skills Kit
+=========================================
+echopy: Alexa Skills Kit SDK (Python 3.6)
+=========================================
+"**Why not Flask-Ask ?**"
+
+Flask-Ask_ carries a number 
+of dependencies (such as Flask_) and requires Zappa_ 
+to deploy to AWS Lambda. Given that Lambda is billed based 
+on memory footprint / execution duration / number of requests, 
+I wanted something more lightweight and more easily deployed 
+to Lambda. 
+
+That's why **echopy** has **no dependencies** and includes 
+a CLI utility ``echodist`` to package skills for deployment.
 
 Sample
 ======
-A sample skill using echopy:
+A sample skill using echopy can be found at this repo:
 https://github.com/arcward/echopy-example
 
 Installation
@@ -51,7 +61,6 @@ four decorators to make that easy:
    + ``@echopy.fallback`` for intent requests without a handler specified
      by ``@echopy.on_intent()``
 
-<<<<<<< HEAD
 Functions with these decorators should take two arguments, one for
 the ``Request`` object and one for the ``Session`` object.
 The request object will either be a ``LaunchRequest``, ``SessionEndedRequest``
@@ -61,7 +70,7 @@ Sending responses
 =================
 Request handlers should return ``Response``, for which you can set:
  - Output speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
-=======
+ 
 Functions with these decorators should take a single argument, which will
 be the ``echopy.Request`` object, through which you can access the
 ``Session`` and ``Context`` objects, as well at the request from the Alexa
@@ -72,7 +81,6 @@ Sending responses
 =================
 Request handlers should return ``echopy.Response``, for which you can set:
  - Output speech: ``echopy.OutputSpeech``
->>>>>>> 75c6cc9e65ee6a5b245a087ff12819900d2abd0e
  - Session attributes (as ``dict[str, object]``)
  - A reprompt: ``Reprompt``
  - A card to display:
@@ -140,6 +148,9 @@ and include ``echopy/`` in in that same top-level directory. So if your
 
 See the `official docs`_ for more info.
 
+.. _flask-ask: https://github.com/johnwheeler/flask-ask
+.. _flask: https://github.com/pallets/flask
+.. _zappa: https://github.com/Miserlou/Zappa
 .. _handler: http://docs.aws.amazon.com/lambda/latest/dg/python-programming-model.html
 .. _`Alexa dev portal`: https://developer.amazon.com/alexa
 .. _`three basic request types`: https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/custom-standard-request-types-reference
