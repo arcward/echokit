@@ -3,7 +3,6 @@
 The ``Response`` object is what you'll return to the Alexa service. It 
 will contain your ``OutputSpeech``, ``Card``, ``Reprompt``...
 """
-from typing import Dict
 
 
 class Response:
@@ -26,7 +25,7 @@ class Response:
         self.version: str = version
         if not session_attributes:
             session_attributes = {}
-        self.session_attributes: Dict[str, object] = session_attributes
+        self.session_attributes = session_attributes
 
     @property
     def output_speech(self):
