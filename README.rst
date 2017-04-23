@@ -1,5 +1,5 @@
 =========================================
-echopy: Alexa Skills Kit SDK (Python 3.6)
+echokit: Alexa Skills Kit SDK (Python 3.6)
 =========================================
 "**Why not Flask-Ask ?**"
 
@@ -10,20 +10,20 @@ on memory footprint / execution duration / number of requests,
 I wanted something more lightweight and more easily deployed 
 to Lambda. 
 
-That's why **echopy** has **no dependencies** and includes 
+That's why **echokit** has **no dependencies** and includes
 a CLI utility ``echodist`` to package skills for deployment.
 
 Sample
 ======
-A sample skill using echopy can be found at this repo:
-https://github.com/arcward/echopy-example
+A sample skill using echokit can be found at this repo:
+https://github.com/arcward/echokit-example
 
 Installation
 ============
 Requirements:
  - ``Python >= 3.6`` (that's it!)
 
-Clone/download the repo, and run this from the ``echopy/`` directory:
+Clone/download the repo, and run this from the ``echokit/`` directory:
 
 .. code-block:: bash
 
@@ -39,27 +39,27 @@ should look like this:
 
 .. code-block:: python
 
-    import echopy
+    import echokit
 
     # Set as your skill's handler in Lambda
-    handler = echopy.handler
+    handler = echokit.handler
     # Set as your application ID from the Alexa dev portal
-    echopy.application_id = "your_application_id"
+    echokit.application_id = "your_application_id"
 
 If your module is ``main.py``, in your Lambda configuration, you'd set
 ``main.handler`` as your handler.
 
 Handling requests
 =================
-There are `three basic request types`_ to handle. In turn, echopy has
+There are `three basic request types`_ to handle. In turn, echokit has
 four decorators to make that easy:
- - ``@echopy.on_session_launch`` for *LaunchRequest*
- - ``@echopy.on_session_ended`` for *SessionEndedRequest*
- - ``@echopy.on_intent(intent_name)`` for an *IntentRequest* matching
+ - ``@echokit.on_session_launch`` for *LaunchRequest*
+ - ``@echokit.on_session_ended`` for *SessionEndedRequest*
+ - ``@echokit.on_intent(intent_name)`` for an *IntentRequest* matching
    ``intent_name``
 
-   + ``@echopy.fallback`` for intent requests without a handler specified
-     by ``@echopy.on_intent()``
+   + ``@echokit.fallback`` for intent requests without a handler specified
+     by ``@echokit.on_intent()``
 
 Functions with these decorators should take two arguments, one for
 the ``Request`` object and one for the ``Session`` object.
@@ -72,15 +72,15 @@ Request handlers should return ``Response``, for which you can set:
  - Output speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
  
 Functions with these decorators should take a single argument, which will
-be the ``echopy.Request`` object, through which you can access the
+be the ``echokit.Request`` object, through which you can access the
 ``Session`` and ``Context`` objects, as well at the request from the Alexa
 service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
 objects).
 
 Sending responses
 =================
-Request handlers should return ``echopy.Response``, for which you can set:
- - Output speech: ``echopy.OutputSpeech``
+Request handlers should return ``echokit.Response``, for which you can set:
+ - Output speech: ``echokit.OutputSpeech``
  - Session attributes (as ``dict[str, object]``)
  - A reprompt: ``Reprompt``
  - A card to display:
@@ -93,24 +93,24 @@ Example
 =======
 .. code-block:: python
 
-    import echopy
-    from echopy import Response, PlainTextOutputSpeech, SimpleCard
+    import echokit
+    from echokit import Response, PlainTextOutputSpeech, SimpleCard
 
-    handler = echopy.handler
-    echopy.application_id = "my_app_id"
+    handler = echokit.handler
+    echokit.application_id = "my_app_id"
 
-    @echopy.on_session_started
+    @echokit.on_session_started
     def start_session(request, session):
         output_speech = PlainTextOutputSpeech("Hello!")
         return Response(output_speech=output_speech)
 
-    @echopy.on_session_ended
+    @echokit.on_session_ended
     def end_session(request, session):
         output_speech = PlainTextOutputSpeech("Goodbye!")
         simple_card = SimpleCard(title="Goodbye", content="Seeya!")
         return Response(output_speech=output_speech, card=simple_card)
 
-    @echopy.on_intent('OrderIntent')
+    @echokit.on_intent('OrderIntent')
     def send_order(request, session):
         menu_item = request.intent.slots['MenuItem'].value
         output_speech = PlainTextOutputSpeech(f"You ordered a {menu_item}")
@@ -137,14 +137,14 @@ run:
 
 This would create ``somepy.zip`` in your home directory (or whever you
 ran the command). If you unzip it, you can see it includes the entire
-subtree of the directory you specified, as well as an ``echopy/`` directory.
+subtree of the directory you specified, as well as an ``echokit/`` directory.
 
 Manually
 --------
 Your ZIP file should be created from within your top-level package (don't
-just zip the enclosing directory). You'll need to download/clone echopy
-and include ``echopy/`` in in that same top-level directory. So if your
-``__init__.py`` is in ``~/my_project/`` you should have ``~/my_project/echopy``.
+just zip the enclosing directory). You'll need to download/clone echokit
+and include ``echokit/`` in in that same top-level directory. So if your
+``__init__.py`` is in ``~/my_project/`` you should have ``~/my_project/echokit``.
 
 See the `official docs`_ for more info.
 

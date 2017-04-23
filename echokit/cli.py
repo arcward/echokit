@@ -1,7 +1,7 @@
 """Command-line utility to create Lambda deployment ZIP files"""
 import argparse
 import os
-import echopy
+import echokit
 import shutil
 import zipfile
 
@@ -27,8 +27,8 @@ def copy_dir(project_path):
     tmp_path = f"tmp-{os.path.basename(os.path.normpath(project_path))}"
     print(f"Copying project directory to temporary path: {tmp_path}")
     shutil.copytree(project_path, tmp_path)
-    shutil.copytree(os.path.dirname(echopy.__file__),
-                    os.path.join(tmp_path, 'echopy'))
+    shutil.copytree(os.path.dirname(echokit.__file__),
+                    os.path.join(tmp_path, 'echokit'))
     return os.path.join(os.path.abspath(os.getcwd()), tmp_path)
 
 

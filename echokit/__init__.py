@@ -1,7 +1,7 @@
 """Handles initial requests/logging"""
 import logging
-from echopy.request_models import RequestWrapper
-from echopy.response_models import Response, \
+from echokit.request_models import RequestWrapper
+from echokit.response_models import Response, \
     PlainTextOutputSpeech, SSMLOutputSpeech, SimpleCard, StandardCard, \
     LinkAccountCard, Reprompt
 
@@ -28,10 +28,10 @@ def handler(event, context):
     """Lambda service calls this method when sending us a request
     
     :param event: Contains data on the Alexa request, used to 
-        create ``echopy.request.RequestWrapper``
+        create ``echokit.request.RequestWrapper``
     :param context: RequestWrapper context, used primarily for logging. 
-        **Note**: *Not* the same as ``echopy.request.Context``
-    :return: Dict of ``echopy.response.ResponseWrapper`` object
+        **Note**: *Not* the same as ``echokit.request.Context``
+    :return: Dict of ``echokit.response.ResponseWrapper`` object
     """
     logger.info(f"Received event: {event}")
     logger.info(f"Log stream name: {context.log_stream_name}")
@@ -64,10 +64,10 @@ def handler(event, context):
 
 
 # Decorators to register functions to handle requests. Ex:
-#   @echopy.on_session_launch
+#   @echokit.on_session_launch
 #   def begin_session(request, session):
-#       speech = echopy.PlainTextOutputSpeech("You started a new session!")
-#       return echopy.Response(output_speech=speech)
+#       speech = echokit.PlainTextOutputSpeech("You started a new session!")
+#       return echokit.Response(output_speech=speech)
 def on_session_launch(func):
     request_handlers['LaunchRequest'] = func
 

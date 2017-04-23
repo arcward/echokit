@@ -6,7 +6,7 @@ import logging
 from collections import namedtuple
 from typing import Dict
 
-import echopy
+import echokit
 
 logger = logging.getLogger(__name__)
 Application = namedtuple('Application', 'application_id')
@@ -37,7 +37,7 @@ def set_unknown(json_obj, model_obj):
 
 
 class RequestWrapper:
-    """RequestWrapper model (``event`` in ``echopy.handler(event, context)``"""
+    """RequestWrapper model (``event`` in ``echokit.handler(event, context)``"""
 
     def __init__(self, version, session, context, request):
         """
@@ -52,12 +52,12 @@ class RequestWrapper:
         self.context = context
         self.request = request
 
-        # Set in ``echopy.verify_application_id`` and ``echopy.application_id``
-        if echopy.verify_application_id:
+        # Set in ``echokit.verify_application_id`` and ``echokit.application_id``
+        if echokit.verify_application_id:
             app_id = self.session.application.application_id
-            if app_id != echopy.application_id:
+            if app_id != echokit.application_id:
                 msg = (f"Received application ID doesn't match. "
-                       f"Expected: {echopy.application_id} "
+                       f"Expected: {echokit.application_id} "
                        f"Received: {app_id}")
                 logger.error(msg)
                 raise Exception(msg)
@@ -107,7 +107,7 @@ class Session:
         :param attributes: Key:value pairs (attribute name: object value)
         :param application: ``Application`` object, where 
             ``Application.application_id`` is the ID of your skill. Set the 
-            expected ID at ``echopy.application_id``
+            expected ID at ``echokit.application_id``
         :param user: ``User`` object
         """
         self.session_id = session_id

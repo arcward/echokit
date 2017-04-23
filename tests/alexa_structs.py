@@ -1,6 +1,6 @@
 from collections import namedtuple
-import echopy
-from echopy import Response, PlainTextOutputSpeech
+import echokit
+from echokit import Response, PlainTextOutputSpeech
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
                                 'aws_request_id memory_limit_in_mb')
@@ -144,30 +144,30 @@ def create_intent(intent_name, new=True, slots=None, attributes=None,
     return intent
 
 
-@echopy.on_session_launch
+@echokit.on_session_launch
 def session_started(request, session):
     output_speech = PlainTextOutputSpeech("You started a new session!")
     return Response(output_speech=output_speech)
 
 
-@echopy.on_session_end
+@echokit.on_session_end
 def session_ended(request, session):
     output_speech = PlainTextOutputSpeech("You ended our session :[")
     return Response(output_speech=output_speech)
 
 
-@echopy.on_intent('SomeIntent')
+@echokit.on_intent('SomeIntent')
 def on_intent(request, session):
     output_speech = PlainTextOutputSpeech("I did something with SomeIntent!")
     return Response(output_speech=output_speech)
 
 
-@echopy.on_intent('OrderIntent')
+@echokit.on_intent('OrderIntent')
 def specific_intent(request, session):
     order = request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
-    card = echopy.StandardCard(
+    card = echokit.StandardCard(
         title="Order",
         text=response_text,
         small_image_url="http://i.imgur.com/PytSZCG.png",
@@ -177,7 +177,7 @@ def specific_intent(request, session):
                     session_attributes=session_attrs, card=card)
 
 
-@echopy.fallback
+@echokit.fallback
 def unimplemented(request, session):
     intent_name = request.intent.name
     output_speech = PlainTextOutputSpeech(f"Sorry, {intent_name} isn't "
