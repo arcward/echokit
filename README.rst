@@ -1,17 +1,15 @@
-=========================================
-echokit: Alexa Skills Kit SDK (Python 3.6)
-=========================================
-"**Why not Flask-Ask ?**"
+=======
+echokit
+=======
+**A lightweight SDK for the Alexa Skills Kit** (Python 3.6)
 
-Flask-Ask_ carries a number
-of dependencies (such as Flask_) and requires Zappa_
-to deploy to AWS Lambda. Given that Lambda is billed based
-on memory footprint / execution duration / number of requests,
-I wanted something more lightweight and more easily deployed
-to Lambda.
-
-That's why **echokit** has **no dependencies** and includes
-a CLI utility ``echodist`` to package skills for deployment.
+Why?
+----
+I felt other solutions were either too clunky, or not quite 
+focused on deployment in AWS Lambda (execution time is money!). 
+That's why echokit has **no dependencies** and includes a 
+command-line tool *echodist* to package itself with your 
+project for easier deployment to Lambda!
 
 Sample
 ======
