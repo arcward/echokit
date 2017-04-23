@@ -1,10 +1,11 @@
 =======
 echokit
 =======
-**A lightweight SDK for the Alexa Skills Kit** (Python 3.6)
+
+**Lightweight SDK for the Alexa Skills Kit** (Python 3.6)
 
 Why?
-----
+====
 I felt other solutions were either too clunky, or not quite 
 focused on deployment in AWS Lambda (execution time is money!). 
 That's why echokit has **no dependencies** and includes a 
