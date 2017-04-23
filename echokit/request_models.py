@@ -38,7 +38,6 @@ def set_unknown(json_obj, model_obj):
 
 class RequestWrapper:
     """RequestWrapper model (``event`` in ``echokit.handler(event, context)``"""
-
     def __init__(self, version, session, context, request):
         """
         

@@ -8,8 +8,8 @@ will contain your ``OutputSpeech``, ``Card``, ``Reprompt``...
 class Response:
     """Wrapper for response parameters and ``Response``"""
     def __init__(self, output_speech=None, card=None, reprompt=None,
-                 should_end_session=None, directives=None,
-                 session_attributes=None, version='1.0'):
+                 should_end_session=None, session_attributes=None,
+                 directives=None, version='1.0'):
         """
         
         :param output_speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
