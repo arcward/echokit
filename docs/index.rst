@@ -16,8 +16,8 @@ Requests
 ========
 For more info, see: `JSON Interface Reference for Custom Skills`_
 
-Handling
---------
+Handling Requests
+-----------------
 Setup/verification
 ^^^^^^^^^^^^^^^^^^
 .. py:data:: application_id
@@ -338,7 +338,7 @@ Response
     .. py:attribute:: version
         :annotation: = '1.0'
 
-Output speech
+Output Speech
 -------------
 PlainText
 ^^^^^^^^^
@@ -358,6 +358,9 @@ SSML
 
     :param str ssml: SSML markup
 
+    .. py:attribute:: type
+        :annotation: = 'SSML'
+
 Reprompt
 --------
 .. py:class:: Reprompt(output_speech)
@@ -372,6 +375,9 @@ Cards
 
 .. py:class:: SimpleCard(title=None, content=None)
 
+    .. py:attribute:: type
+        :annotation: = 'Simple'
+
     .. py:attribute:: title
         :annotation: = None
 
@@ -380,6 +386,9 @@ Cards
 
 .. py:class:: StandardCard(title=None, text=None, small_image_url=None, \
                            large_image_url=None)
+
+    .. py:attribute:: type
+        :annotation: = 'Standard'
 
     .. py:attribute:: title
         :annotation: = None
@@ -394,6 +403,9 @@ Cards
         :annotation: = None
 
 .. py:class:: LinkAccountCard(content=None)
+
+    .. py:attribute:: type
+        :annotation: = 'LinkAccount'
 
     .. py:attribute:: content
         :annotation: = None
