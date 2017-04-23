@@ -73,8 +73,32 @@ Decorators
 
     :param str intent_name: Name of the intent to handle (:py:attr:`Intent.name <request_models.Intent.name>`)
 
-Example
-~~~~~~~
+.. py:decoratormethod:: fallback
+
+   Designates the handler function for any :py:class:`IntentRequest <request_models.IntentRequest>` whose
+   name doesn't have an associated handler via :py:func:`@echokit.on_intent() <on_intent>`. If not
+   used, will default to:
+
+    .. py:function:: fallback_default(request, session)
+
+        The default handler for incoming intent requests where the intent name
+        doesn't match anything handled via
+        :py:func:`@echokit.on_intent() <echokit.on_intent>` and no handler has
+        been specified via :py:func:`@echokit.fallback <echokit.fallback>`.
+
+        :return: PlainText speech: "*Sorry, I didn't understand your request*"
+        :rtype: :py:class:`Response`
+
+Usage
+~~~~~
+Handler functions should accept two arguments:
+
+ - The first, for a request object (:class:`LaunchRequest`, :class:`SessionEndedRequest` or :class:`IntentRequest`)
+ - The second, for a :class:`Session` object
+
+They should also return a :class:`Response` object.
+For example:
+
 .. code-block:: python
 
     @echokit.on_session_launch
@@ -87,22 +111,6 @@ Example
         speech = f"You invoked {request.intent.name}"
         return Response(output_speech=PlainTextOutputSpeech(speech))
 
-Unrecognized intents
-^^^^^^^^^^^^^^^^^^^^
-.. py:decoratormethod:: fallback
-
-   Designates the handler function for any :py:class:`IntentRequest <request_models.IntentRequest>` whose
-   name doesn't have an associated handler via :py:func:`@echokit.on_intent() <on_intent>`
-
-.. py:function:: fallback_default(request, session)
-
-    The default handler for incoming intent requests where the intent name
-    doesn't match anything handled via
-    :py:func:`@echokit.on_intent() <echokit.on_intent>` and no handler has
-    been specified via :py:func:`@echokit.fallback <echokit.fallback>`.
-
-    :return: PlainText speech: "*Sorry, I didn't understand your request*"
-    :rtype: :py:class:`Response`
 
 Models
 ------

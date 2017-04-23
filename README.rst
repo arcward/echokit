@@ -23,7 +23,15 @@ Installation
 Requirements:
  - ``Python >= 3.6`` (that's it!)
 
-Clone/download the repo, and run this from the ``echokit/`` directory:
+**Using pip**:
+
+.. code-block:: bash
+
+    $ pip install echokit
+
+**From GitHub**:
+
+Clone/download this repo and run this from the ``echokit/`` directory:
 
 .. code-block:: bash
 
@@ -48,46 +56,6 @@ should look like this:
 
 If your module is ``main.py``, in your Lambda configuration, you'd set
 ``main.handler`` as your handler.
-
-Handling requests
-=================
-There are `three basic request types`_ to handle. In turn, echokit has
-four decorators to make that easy:
- - ``@echokit.on_session_launch`` for *LaunchRequest*
- - ``@echokit.on_session_ended`` for *SessionEndedRequest*
- - ``@echokit.on_intent(intent_name)`` for an *IntentRequest* matching
-   ``intent_name``
-
-   + ``@echokit.fallback`` for intent requests without a handler specified
-     by ``@echokit.on_intent()``
-
-Functions with these decorators should take two arguments, one for
-the ``Request`` object and one for the ``Session`` object.
-The request object will either be a ``LaunchRequest``, ``SessionEndedRequest``
-or ``IntentRequest``.
-
-Sending responses
-=================
-Request handlers should return ``Response``, for which you can set:
- - Output speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
- 
-Functions with these decorators should take a single argument, which will
-be the ``echokit.Request`` object, through which you can access the
-``Session`` and ``Context`` objects, as well at the request from the Alexa
-service (either ``LaunchRequest``, ``SessionEndedRequest`` or ``IntentRequest``
-objects).
-
-Sending responses
-=================
-Request handlers should return ``echokit.Response``, for which you can set:
- - Output speech: ``echokit.OutputSpeech``
- - Session attributes (as ``dict[str, object]``)
- - A reprompt: ``Reprompt``
- - A card to display:
-
-   + ``SimpleCard``
-   + ``StandardCard``
-   + ``LinkAccountCard``
 
 Example
 =======
