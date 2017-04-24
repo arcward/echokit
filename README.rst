@@ -12,11 +12,6 @@ That's why echokit has **no dependencies** and includes a
 command-line tool *echodist* to package itself with your 
 project for easier deployment to Lambda!
 
-Sample
-======
-A sample skill using echokit can be found at this repo:
-https://github.com/arcward/echokit-example
-
 Installation
 ============
 Requirements:
@@ -35,6 +30,11 @@ Clone/download this repo and run this from the ``echokit/`` directory:
 .. code-block:: bash
 
     $ python setup.py install
+    
+Sample
+======
+A sample skill using echokit can be found at this repo:
+https://github.com/arcward/echokit-example
 
 =============
 Documentation
