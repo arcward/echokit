@@ -1,6 +1,7 @@
 from collections import namedtuple
 import echokit
-from echokit import Response, PlainTextOutputSpeech
+from echokit import Response, AudioPlayerDirective
+from echokit.responses.directives import PlayBehavior
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
                                 'aws_request_id memory_limit_in_mb')
@@ -126,6 +127,85 @@ base_intent = {
   }
 }
 
+resume_json = {
+  "session": {
+    "sessionId": "SessionId.d06789a8-a48e-450c-a4ef-f4e25b0bc351",
+    "application": {
+      "applicationId": "some_app_id"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "some_userid"
+    },
+    "new": True
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.83810a3b-2b23-450b-bd00-ad31b45cc17c",
+    "locale": "en-US",
+    "timestamp": "2017-04-24T14:45:45Z",
+    "intent": {
+      "name": "AMAZON.ResumeIntent",
+      "slots": {}
+    }
+  },
+  "version": "1.0"
+}
+
+pause_json = {
+
+  "session": {
+    "sessionId": "SessionId.3cec3682-31b1-41e1-bb59-c9a0c2ddae6e",
+    "application": {
+      "applicationId": "amzn1.ask.skill.3c392942-8efb-48a1-89ff-05af9eaa9c5e"
+    },
+    "attributes": {},
+    "user": {
+      "userId": "amzn1.ask.account.AEZQUQ4CYZSKQRADTPB4FQBYX6EI4DSLHE3VAAEQX3PE33EEWZOPUJY46NFKC4PW77CYQ7DXQNZJND2ANCYBX7SU5AZ2XXSSHGIVQBWUKUZPTPR4PIFZHF2BCHKBWKIG5V7WNFQO4POJHJQXJZAGA7GBF452E4F3A2H5XV4RGSSJPG47UM72R7G2IDKZMZ2G42ZVQ5C5BDINIEY"
+    },
+    "new": True
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "EdwRequestId.d580a39d-f090-46ca-9f67-b12b98ab3f3c",
+    "locale": "en-US",
+    "timestamp": "2017-04-24T14:49:11Z",
+    "intent": {
+      "name": "AMAZON.PauseIntent",
+      "slots": {}
+    }
+  },
+  "version": "1.0"
+}
+
+
+playback_failed_json = {
+  "version": "string",
+  "context": {
+    "System": {
+      "application": {},
+      "user": {},
+      "device": {}
+    }
+  },
+  "request": {
+    "type": "AudioPlayer.PlaybackFailed",
+    "requestId": "string",
+    "timestamp": "string",
+    "token": "string",
+    "locale": "string",
+    "error": {
+      "type": "string",
+      "message": "string"
+    },
+    "currentPlaybackState": {
+      "token": "string",
+      "offsetInMilliseconds": 0,
+      "playerActivity": "string"
+    }
+  }
+}
+
 
 def create_intent(intent_name, new=True, slots=None, attributes=None,
                   application_id=None):
@@ -142,6 +222,23 @@ def create_intent(intent_name, new=True, slots=None, attributes=None,
     if application_id:
         intent['session']['application']['applicationId'] = application_id
     return intent
+
+
+@echokit.on_intent('AudioPlayer.PlaybackFailed')
+def playback_failed(request, context):
+    print(request)
+    print(context)
+
+
+@echokit.on_intent('AMAZON.ResumeIntent')
+def resume_audio(request, session):
+    return AudioPlayerDirective.play(PlayBehavior.REPLACE_ALL,
+                                     "https://url.com", "some_token", 0)
+
+
+@echokit.on_intent('AMAZON.PauseIntent')
+def pause_audio(request, session):
+    pass
 
 
 @echokit.on_session_launch

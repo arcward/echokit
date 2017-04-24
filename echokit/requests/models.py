@@ -6,10 +6,10 @@ import logging
 from collections import namedtuple
 from typing import Dict
 
-import echokit
 
 logger = logging.getLogger(__name__)
 Application = namedtuple('Application', 'application_id')
+Error = namedtuple('Error', 'type message')
 attr_map = {
     'accessToken': 'access_token',
     'applicationId': 'application_id',
@@ -27,66 +27,6 @@ attr_map = {
     'offsetInMilliseconds': 'offset_in_milliseconds',
     'playerActivity': 'player_activity'
 }
-
-
-def set_unknown(json_obj, model_obj):
-    """Assigns unexpected attributes from JSON structure to model"""
-    for k, v in json_obj.items():
-        if k not in attr_map and k not in model_obj.__dict__:
-            setattr(model_obj, k, v)
-
-
-class RequestWrapper:
-    """RequestWrapper model (``event`` in ``echokit.handler(event, context)``"""
-    def __init__(self, version, session, context, request):
-        """
-        
-        :param version: 
-        :param session: ``Session`` object
-        :param context: ``Context`` object
-        :param request: ``RequestWrapper`` object
-        """
-        self.version = version
-        self.session = session
-        self.context = context
-        self.request = request
-
-        # Set in ``echokit.verify_application_id`` and ``echokit.application_id``
-        if echokit.verify_application_id:
-            app_id = self.session.application.application_id
-            if app_id != echokit.application_id:
-                msg = (f"Received application ID doesn't match. "
-                       f"Expected: {echokit.application_id} "
-                       f"Received: {app_id}")
-                logger.error(msg)
-                raise Exception(msg)
-
-    @staticmethod
-    def from_json(json_obj):
-        context = json_obj.get('context')
-        if context:
-            context = Context.from_json(context)
-
-        req = RequestWrapper(
-            version=json_obj['version'], context=context,
-            session=Session.from_json(json_obj['session']),
-            request=RequestWrapper._factory(json_obj['request'])
-        )
-        set_unknown(json_obj, req)
-        return req
-
-    @staticmethod
-    def _factory(json_request):
-        request_types = {
-            'LaunchRequest': LaunchRequest,
-            'IntentRequest': IntentRequest,
-            'SessionEndedRequest': SessionEndedRequest
-        }
-        request_type = json_request.get('type')
-        if request_type:
-            return request_types[request_type].from_json(json_request)
-        else:
-            return {}
 
 
 class Session:
@@ -122,8 +62,7 @@ class Session:
                     json_obj['user'].get('accessToken'),
                     json_obj['user'].get('permissions'))
         session = Session(json_obj['sessionId'], json_obj['new'],
-                          json_obj.get('attributes'), app, user)
-        set_unknown(json_obj, session)
+                          json_obj.get('attributes', {}), app, user)
         return session
 
 
@@ -143,11 +82,10 @@ class Context:
         system = json_obj.get('System')
         if system:
             system = System.from_json(system)
+
         audio_player = json_obj.get('AudioPlayer')
-        if audio_player:
-            audio_player = AudioPlayer.from_json(audio_player)
+
         context = Context(system, audio_player)
-        set_unknown(json_obj, system)
         return context
 
     def to_json(self):
@@ -194,7 +132,6 @@ class System:
 
         api_endpoint = json_obj.get('apiEndpoint')
         system = System(application, user, device, api_endpoint)
-        set_unknown(json_obj, system)
         return system
 
     def to_json(self):
@@ -233,91 +170,9 @@ class User:
         self.permissions = permissions
 
 
-class LaunchRequest:
-    """Received when the user didn't provide a specific intent"""
-    request_type = 'LaunchRequest'
-
-    def __init__(self, request_id, timestamp, locale):
-        self.request_id = request_id
-        self.timestamp = timestamp
-        self.locale = locale
-
-    @staticmethod
-    def from_json(json_obj):
-        launch_request = LaunchRequest(json_obj['requestId'],
-                                       json_obj['timestamp'],
-                                       json_obj['locale'])
-        set_unknown(json_obj, launch_request)
-        return launch_request
-
-
-class SessionEndedRequest:
-    """Received upon user exit, lack of response, or error.
-
-    Not received if the session is ended because you set the 
-    ``should_end_session`` flag to ``True``
-    """
-    request_type = 'SessionEndedRequest'
-    _Error = namedtuple('Error', 'type message')
-
-    def __init__(self, request_id, timestamp, locale, reason, error):
-        """
-
-        :param request_id: 
-        :param timestamp: 
-        :param locale: 
-        :param reason: Describes reason for session end. Values: 
-            ``USER_INITIATED``, ``ERROR``, ``EXCEEDED_MAX_REPROMPTS``
-        :param error: ``Error`` object with more info on any error
-        """
-        self.request_id = request_id
-        self.timestamp = timestamp
-        self.locale = locale
-        self.reason = reason
-        self.error = error
-
-    @staticmethod
-    def from_json(json_obj):
-        error = SessionEndedRequest._Error(json_obj.get('type'),
-                                           json_obj.get('message'))
-        end_request = SessionEndedRequest(json_obj['requestId'],
-                                          json_obj['timestamp'],
-                                          json_obj['locale'],
-                                          json_obj.get('dialogState'),
-                                          error)
-        set_unknown(json_obj, end_request)
-        return end_request
-
-
-class IntentRequest:
-    """Received when the user supplies an intent"""
-    request_type = 'IntentRequest'
-
-    def __init__(self, request_id, timestamp, locale, dialog_state, intent):
-        """
-        
-        :param request_id: 
-        :param timestamp: 
-        :param locale: 
-        :param dialog_state: Enumeration of status of multi-turn dialog. 
-            Values: ``STARTED``, ``IN_PROGRESS``, ``COMPLETED``
-        :param intent: ``Intent`` object
-        """
-        self.request_id = request_id
-        self.timestamp = timestamp
-        self.locale = locale
-        self.dialog_state = dialog_state
-        self.intent = intent
-
-    @staticmethod
-    def from_json(json_obj):
-        intent_request = IntentRequest(json_obj['requestId'],
-                                       json_obj['timestamp'],
-                                       json_obj['locale'],
-                                       json_obj.get('dialogState'),
-                                       Intent.from_json(json_obj['intent']))
-        set_unknown(json_obj, intent_request)
-        return intent_request
+class AudioPlayerRequest:
+    def __init__(self, version, ):
+        pass
 
 
 class Intent:
@@ -346,7 +201,6 @@ class Intent:
             slots[k] = Slot.from_json(v)
         intent = Intent(json_obj['name'], json_obj.get('confirmationStatus'),
                         slots)
-        set_unknown(json_obj, intent)
         return intent
 
 
@@ -370,33 +224,32 @@ class Slot:
     def from_json(json_obj):
         slot = Slot(json_obj.get('name'), json_obj.get('value'),
                     json_obj.get('confirmationStatus'))
-        set_unknown(json_obj, slot)
         return slot
 
 
-class AudioPlayer:
-    def __init__(self, token, offset_in_milliseconds, player_activity):
-        self.token = token
-        self.offset_in_milliseconds = offset_in_milliseconds
-        self.player_activity = player_activity
-
-    @staticmethod
-    def from_json(json_obj):
-        audio_player = AudioPlayer(json_obj.get('token'),
-                                   json_obj.get('offsetInMilliseconds'),
-                                   json_obj.get('playerActivity'))
-        set_unknown(json_obj, audio_player)
-        return audio_player
-
-    def to_json(self):
-        ap_dict = {
-            'token': self.token,
-            'offsetInMilliseconds': self.offset_in_milliseconds,
-            'playerActivity': self.player_activity
-        }
-        return {k: v for (k, v) in ap_dict.items() if v is not None}
-
-
-class AudioPlayerDirective:
-    def __init__(self):
-        pass
+# class AudioPlayer:
+#     def __init__(self, token, offset_in_milliseconds, player_activity):
+#         self.token = token
+#         self.offset_in_milliseconds = offset_in_milliseconds
+#         self.player_activity = player_activity
+#
+#     @staticmethod
+#     def from_json(json_obj):
+#         audio_player = AudioPlayer(json_obj.get('token'),
+#                                    json_obj.get('offsetInMilliseconds'),
+#                                    json_obj.get('playerActivity'))
+#         set_unknown(json_obj, audio_player)
+#         return audio_player
+#
+#     def to_json(self):
+#         ap_dict = {
+#             'token': self.token,
+#             'offsetInMilliseconds': self.offset_in_milliseconds,
+#             'playerActivity': self.player_activity
+#         }
+#         return {k: v for (k, v) in ap_dict.items() if v is not None}
+#
+#
+# class AudioPlayerDirective:
+#     def __init__(self):
+#         pass

@@ -1,10 +1,11 @@
 from unittest import TestCase
-from .alexa_structs import *
+from tests.alexa_structs import *
 
 
 class TestRequests(TestCase):
     def setUp(self):
         echokit.application_id = "amzn1.ask.skill.[unique-value-here]"
+        echokit.verify_application_id = False
         self.basic_response_keys = ['version', 'response']
 
     def test_start_session(self):
@@ -70,4 +71,8 @@ class TestRequests(TestCase):
         expected_speech = {'type': 'PlainText',
                            'text': "Sorry, WeirdIntent isn't implemented!"}
         self.assertEqual(expected_speech, r['response']['outputSpeech'])
+
+    def test_play_directive(self):
+        r = echokit.handler(resume_json, mock_context)
+        print(r)
 
