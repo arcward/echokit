@@ -1,4 +1,3 @@
-
 NEXT_COMMAND_ISSUED = 'PlaybackController.NextCommandIssued'
 PAUSE_COMMAND_ISSUED = 'PlaybackController.PauseCommandIssued'
 PLAY_COMMAND_ISSUED = 'PlaybackController.PlayCommandIssued'
@@ -12,13 +11,8 @@ class PlaybackController:
         self.timestamp = timestamp
         self.locale = locale
 
-    def to_json(self):
-        return {
-            'type': self.type,
-            'requestId': self.request_id,
-            'timestamp': self.timestamp,
-            'locale': self.locale
-        }
+    def _dict(self):
+        return self.__dict__
 
 
 class NextCommandIssued(PlaybackController):
@@ -39,11 +33,3 @@ class PlayCommandIssued(PlaybackController):
 class PreviousCommandIssued(PlaybackController):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-
-models = {
-    NEXT_COMMAND_ISSUED: NextCommandIssued,
-    PAUSE_COMMAND_ISSUED: PauseCommandIssued,
-    PLAY_COMMAND_ISSUED: PlayCommandIssued,
-    PREVIOUS_COMMAND_ISSUED: PreviousCommandIssued
-}

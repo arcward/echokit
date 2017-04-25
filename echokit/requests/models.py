@@ -3,55 +3,10 @@
 https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/alexa-skills-kit-interface-reference#session-object
 """
 import logging
-from collections import namedtuple
 from typing import Dict
-
 from echokit.audio_player import AudioPlayer
 
 logger = logging.getLogger(__name__)
-Application = namedtuple('Application', 'application_id')
-Error = namedtuple('Error', 'type message')
-attr_map = {
-    'accessToken': 'access_token',
-    'applicationId': 'application_id',
-    'sessionId': 'session_id',
-    'AudioPlayer': 'audio_player',
-    'System': 'system',
-    'Device': 'device',
-    'deviceId': 'device_id',
-    'supportedInterfaces': 'supported_interfaces',
-    'userId': 'user_id',
-    'apiEndpoint': 'api_endpoint',
-    'requestId': 'request_id',
-    'dialogState': 'dialog_state',
-    'confirmationStatus': 'confirmation_status',
-    'offsetInMilliseconds': 'offset_in_milliseconds',
-    'playerActivity': 'player_activity'
-}
-#
-# def is_standard(request):
-#     return request['type'] in standard_models
-#
-#
-# def is_intent(request):
-#     return request['type'] == 'IntentRequest'
-#
-#
-# def is_audio_player(request):
-#     return request['type'] in audio_player_models
-#
-#
-# def is_playback_controller(request):
-#     return request['type'] in playback_controller_models
-#
-#
-# def request_type_model(request):
-#     if request['type'] in standard_models:
-#         return standard_models[request['type']].from_json(request)
-#     elif request['type'] in audio_player_models:
-#         return audio_player_models[request['type']].from_json(request)
-#     else:
-#         raise KeyError()
 
 
 class Session:
@@ -108,12 +63,6 @@ class Context:
             system = System._build(**system)
         return Context(system, audio_player)
 
-    def to_json(self):
-        context_dict = {'System': self.system._dict()}
-        if self.audio_player:
-            context_dict['AudioPlayer'] = self.audio_player._dict()
-        return context_dict
-
 
 class Device:
     def __init__(self, device_id=None, supported_interfaces=None):
@@ -156,24 +105,6 @@ class System:
 
         return System(**kwargs)
 
-    def to_json(self):
-        sys_dict = {'apiEndpoint': self.api_endpoint}
-
-        if self.application:
-            sys_dict['application'] = {'applicationId':
-                                       self.application['applicationId']}
-
-        if self.user:
-            sys_dict['user'] = self.user._dict()
-
-        if self.device:
-            sys_dict['device'] = {
-                'deviceId': self.device.device_id,
-                'supportedInterfaces': self.device.supported_interfaces
-            }
-
-        return {k: v for (k, v) in sys_dict if v is not None}
-
 
 class User:
     """Describes a user making a request"""
@@ -190,11 +121,6 @@ class User:
         self.user_id = user_id
         self.access_token = access_token
         self.permissions = permissions
-
-
-class AudioPlayerRequest:
-    def __init__(self, version, ):
-        pass
 
 
 class Intent:
@@ -227,7 +153,6 @@ class Intent:
 
 class Slot:
     """``Slot`` present in ``Intent.slots``"""
-
     def __init__(self, name=None, value=None, confirmation_status=None):
         """
         
@@ -241,10 +166,13 @@ class Slot:
         self.value = value
         self.confirmation_status = confirmation_status
 
-    @staticmethod
-    def from_json(json_obj):
-        slot = Slot(json_obj.get('name'), json_obj.get('value'),
-                    json_obj.get('confirmationStatus'))
-        return slot
+
+class Application:
+    def __init__(self, application_id):
+        self.application_id = application_id
 
 
+class Error:
+    def __init__(self, type=None, message=None):
+        self.type = type
+        self.message = message

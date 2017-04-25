@@ -32,6 +32,7 @@ def handler(event, context):
                                               event.get('version'))
     handler_func = _get_handler(event['request'])
     response = handler_func(request_wrapper)
+    # Won't always receive responses (ex: SessionEndedRequest)
     if response is not None:
         response_dict = response._dict()
         revert_keys(response_dict)
@@ -50,4 +51,3 @@ def _get_handler(request):
     else:
         func = handler_funcs[request['type']]
     return func
-

@@ -1,5 +1,6 @@
-import echokit
-from collections import namedtuple
+"""AudioPlayer interface implementation
+https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/custom-audioplayer-interface-reference
+"""
 from enum import Enum
 from echokit.request_handler import handler_funcs
 
@@ -9,30 +10,6 @@ PLAYBACK_STOPPED = 'AudioPlayer.PlaybackStopped'
 PLAYBACK_NEARLY_FINISHED = 'AudioPlayer.PlaybackNearlyFinished'
 PLAYBACK_FAILED = 'AudioPlayer.PlaybackFailed'
 EXCEPTION_ENCOUNTERED = 'System.ExceptionEncountered'
-
-
-Error = namedtuple('Error', 'type message')
-Cause = namedtuple('Cause', 'request_id')
-CurrentPlaybackState = namedtuple('CurrentPlaybackState',
-                                  'token offset_in_milliseconds '
-                                  'player_activity')
-
-
-class PlayerActivity(Enum):
-    IDLE = 'IDLE'
-    PAUSED = 'PAUSED'
-    PLAYING = 'PLAYING'
-    BUFFER_UNDERRUN = 'BUFFER_UNDERRUN'
-    FINISHED = 'FINISHED'
-    STOPPED = 'STOPPED'
-
-
-def _from_json(json_obj, cls):
-    return cls(json_obj['requestId'], json_obj['timestamp'],
-                     json_obj['token'], json_obj['offsetInMilliseconds'])
-    # elif json_obj['type'] in error_types:
-    #     error_model = error_types[json_obj['type']]
-    #     return error_model.from_json(json_obj)
 
 
 class AudioPlayerState:
@@ -98,17 +75,6 @@ class PlaybackFailedRequest:
             CurrentPlaybackState(**kwargs['current_playback_state'])
         return PlaybackFailedRequest(**kwargs)
 
-    @staticmethod
-    def from_json(json_obj):
-        error = Error(json_obj['error']['type'], json_obj['error']['message'])
-        json_state = json_obj['currentPlaybackState']
-        state = CurrentPlaybackState(json_state['token'],
-                                     json_state['offsetInMilliseconds'],
-                                     json_state['playerActivity'])
-        return PlaybackFailedRequest(json_obj['requestId'], json_obj['timestamp'],
-                              json_obj['token'], json_obj['locale'], error,
-                              state)
-
 
 class ExceptionEncountered:
     def __init__(self, type, request_id, timestamp, locale, error, cause):
@@ -125,13 +91,33 @@ class ExceptionEncountered:
         kwargs['cause'] = Cause(**kwargs['cause'])
         return ExceptionEncountered(**kwargs)
 
-    @staticmethod
-    def from_json(json_obj):
-        error = Error(json_obj['error']['type'], json_obj['error']['message'])
-        cause = Cause(json_obj['cause']['requestId'])
-        return ExceptionEncountered(json_obj['requestId'],
-                                    json_obj['timestamp'], json_obj['locale'],
-                                    error, cause)
+
+class Error:
+    def __init__(self, type=None, message=None):
+        self.type = type
+        self.message = message
+
+
+class Cause:
+    def __init__(self, request_id=None):
+        self.request_id = request_id
+
+
+class CurrentPlaybackState:
+    def __init__(self, token=None, offset_in_milliseconds=None,
+                 player_activity=None):
+        self.token = token
+        self.offset_in_milliseconds = offset_in_milliseconds
+        self.player_activity = player_activity
+
+
+class PlayerActivity(Enum):
+    IDLE = 'IDLE'
+    PAUSED = 'PAUSED'
+    PLAYING = 'PLAYING'
+    BUFFER_UNDERRUN = 'BUFFER_UNDERRUN'
+    FINISHED = 'FINISHED'
+    STOPPED = 'STOPPED'
 
 
 def playback_started(func):
@@ -157,10 +143,3 @@ def playback_failed(func):
 def exception(func):
     handler_funcs[EXCEPTION_ENCOUNTERED] = func
 
-
-class AudioPlayer:
-    def __init__(self, token=None, offset_in_milliseconds=None,
-                 player_activity=None):
-        self.token = token
-        self.offset_in_milliseconds = offset_in_milliseconds
-        self.player_activity = player_activity

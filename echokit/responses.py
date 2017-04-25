@@ -3,16 +3,35 @@
 The ``Response`` object is what you'll return to the Alexa service. It 
 will contain your ``OutputSpeech``, ``Card``, ``Reprompt``...
 """
+from echokit.speech import SSMLOutputSpeech, PlainTextOutputSpeech
+
+
+def ask(speech, reprompt_speech, card=None, ssml=False):
+    output_speech = __speech(speech, ssml)
+    reprompt = __speech(reprompt_speech, ssml)
+    return Response(output_speech=output_speech, reprompt=reprompt,
+                    card=card, should_end_session=False)
+
+
+def tell(speech, card=None, ssml=False):
+    output_speech = __speech(speech, ssml)
+    return Response(output_speech=output_speech, card=card,
+                    should_end_session=True)
+
+
+def __speech(text, ssml):
+    if ssml:
+        return SSMLOutputSpeech(text)
+    else:
+        return PlainTextOutputSpeech(text)
 
 
 class Response:
     """Wrapper for response parameters and ``Response``"""
-
     def __init__(self, output_speech=None, card=None, reprompt=None,
                  should_end_session=None, session_attributes=None,
                  directives=None, version='1.0'):
         """
-
         :param output_speech: ``PlainTextOutputSpeech`` or ``SSMLOutputSpeech``
         :param card: ``SimpleCard``, ``StandardCard`` or ``LinkAccountCard``
         :param reprompt: ``Reprompt``
@@ -74,18 +93,9 @@ class Response:
         self.response.directives = directives
 
     def _dict(self):
-        return {
-            'session_attributes': self.session_attributes,
-            'version': self.version,
-            'response': self.response._dict()
-        }
-
-    def to_json(self):
-        return {
-            'version': self.version,
-            'response': self.response.to_json(),
-            'sessionAttributes': self.session_attributes
-        }
+        return {'session_attributes': self.session_attributes,
+                'version': self.version,
+                'response': self.response._dict()}
 
 
 class AudioPlayerResponse:
@@ -94,15 +104,12 @@ class AudioPlayerResponse:
         self.directives = directives
 
     def _dict(self):
-        return {
-            'version': self.version,
-            'directives': [d._dict() for d in self.directives]
-        }
+        return {'version': self.version,
+                'directives': [d._dict() for d in self.directives]}
 
 
 class _Response:
     """``Response`` object in actual API response"""
-
     def __init__(self, output_speech=None, card=None, reprompt=None,
                  should_end_session=None, directives=None):
         """
@@ -130,22 +137,6 @@ class _Response:
             d['directives'] = [apd._dict() for apd in self.directives]
         return d
 
-    def to_json(self):
-        response_dict = {
-            'shouldEndSession': self.should_end_session,
-            'directives': []
-        }
-        if self.output_speech:
-            response_dict['outputSpeech'] = self.output_speech._dict()
-        if self.card:
-            response_dict['card'] = self.card._dict()
-        if self.reprompt:
-            response_dict['reprompt'] = self.reprompt._dict()
-        if self.directives:
-            response_dict['directives'] = [d._dict() for d in
-                                           self.directives]
-        return {k: v for (k, v) in response_dict.items() if v is not None}
-
 
 class Reprompt:
     """Reprompt, only in respones to ``LaunchRequest`` or ``IntentRequest``"""
@@ -161,3 +152,18 @@ class Reprompt:
         if self.output_speech:
             rp_dict['outputSpeech'] = self.output_speech._dict()
         return rp_dict
+
+
+class Card:
+    @staticmethod
+    def simple(title=None, content=None):
+        return SimpleCard(title, content)
+
+    @staticmethod
+    def standard(title=None, text=None, small_image_url=None,
+                 large_image_url=None):
+        return StandardCard(title, text, small_image_url, large_image_url)
+
+    @staticmethod
+    def link_account(content=None):
+        return LinkAccountCard(content)

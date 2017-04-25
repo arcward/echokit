@@ -18,13 +18,3 @@ class SSMLOutputSpeech:
 
     def _dict(self):
         return self.__dict__
-
-
-class OutputSpeech:
-    @staticmethod
-    def plain_text(text):
-        return PlainTextOutputSpeech(text)
-
-    @staticmethod
-    def ssml(ssml):
-        return SSMLOutputSpeech(ssml)

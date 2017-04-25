@@ -53,18 +53,3 @@ class LinkAccountCard:
 
     def _dict(self):
         return self.__dict__
-
-
-class Card:
-    @staticmethod
-    def simple(title=None, content=None):
-        return SimpleCard(title, content)
-
-    @staticmethod
-    def standard(title=None, text=None, small_image_url=None,
-                 large_image_url=None):
-        return StandardCard(title, text, small_image_url, large_image_url)
-
-    @staticmethod
-    def link_account(content=None):
-        return LinkAccountCard(content)
