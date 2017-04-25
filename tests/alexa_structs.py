@@ -1,7 +1,8 @@
 from collections import namedtuple
 import echokit
-from echokit import Response, AudioPlayerDirective
-from echokit.responses.directives import PlayBehavior
+from echokit import Response
+from echokit.speech import PlainTextOutputSpeech
+from echokit.directives import PlayBehavior, AudioPlayerDirective
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
                                 'aws_request_id memory_limit_in_mb')
@@ -225,42 +226,45 @@ def create_intent(intent_name, new=True, slots=None, attributes=None,
 
 
 @echokit.on_intent('AudioPlayer.PlaybackFailed')
-def playback_failed(request, context):
+def playback_failed(request_wrapper):
+    request = request_wrapper.request
+    context = request_wrapper.context
     print(request)
     print(context)
 
 
 @echokit.on_intent('AMAZON.ResumeIntent')
-def resume_audio(request, session):
+def resume_audio(request_wrapper):
     return AudioPlayerDirective.play(PlayBehavior.REPLACE_ALL,
                                      "https://url.com", "some_token", 0)
 
 
 @echokit.on_intent('AMAZON.PauseIntent')
-def pause_audio(request, session):
+def pause_audio(request_wrapper):
     pass
 
 
 @echokit.on_session_launch
-def session_started(request, session):
+def session_started(request_wrapper):
     output_speech = PlainTextOutputSpeech("You started a new session!")
     return Response(output_speech=output_speech)
 
 
 @echokit.on_session_end
-def session_ended(request, session):
-    output_speech = PlainTextOutputSpeech("You ended our session :[")
-    return Response(output_speech=output_speech)
+def session_ended(request_wrapper):
+    print(request_wrapper.request.reason)
 
 
 @echokit.on_intent('SomeIntent')
-def on_intent(request, session):
+def on_intent(request_wrapper):
     output_speech = PlainTextOutputSpeech("I did something with SomeIntent!")
     return Response(output_speech=output_speech)
 
 
 @echokit.on_intent('OrderIntent')
-def specific_intent(request, session):
+def specific_intent(request_wrapper):
+    request = request_wrapper.request
+    context = request_wrapper.context
     order = request.intent.slots['Order'].value
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
@@ -275,7 +279,9 @@ def specific_intent(request, session):
 
 
 @echokit.fallback
-def unimplemented(request, session):
+def unimplemented(request_wrapper):
+    request = request_wrapper.request
+    context = request_wrapper.context
     intent_name = request.intent.name
     output_speech = PlainTextOutputSpeech(f"Sorry, {intent_name} isn't "
                                           f"implemented!")

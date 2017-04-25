@@ -69,10 +69,9 @@ class TestRequests(TestCase):
         self.assertEqual(r['version'], '1.0')
 
         expected_speech = {'type': 'PlainText',
-                           'text': "Sorry, WeirdIntent isn't implemented!"}
+                           'text': "Sorry, I didn't understand your request"}
         self.assertEqual(expected_speech, r['response']['outputSpeech'])
 
     def test_play_directive(self):
         r = echokit.handler(resume_json, mock_context)
         print(r)
-

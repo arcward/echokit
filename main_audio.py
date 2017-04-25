@@ -1,6 +1,7 @@
 import echokit
 from echokit import Response, PlainTextOutputSpeech, SimpleCard
-from echokit import directives, audio_player
+from echokit import audio_player
+from echokit.directives import AudioPlayerDirective, PlayBehavior
 
 # In the Lambda config, 'handler' would be
 # set to ``order_skill.handler``
@@ -10,33 +11,27 @@ handler = echokit.handler
 echokit.verify_application_id = False
 
 
-# All apps are required to handle three basic requests,
-# which have their own decorators:
-# * LaunchRequest:          @echokit.on_session_launch
-# * SessionEndedRequest:    @echokit.on_session_end
-# * IntentRequest:          @echokit.on_intent('your_intent_name')
-
-# Handles: LaunchRequest
-@echokit.on_session_launch
-def session_started(request_wrapper):
-    output_speech = PlainTextOutputSpeech("Welcome to Order Maker!")
-    return Response(output_speech=output_speech)
+@echokit.on_intent('AMAZON.ResumeIntent')
+def resume_audio(request_wrapper):
+    play_directive = AudioPlayerDirective.play(PlayBehavior.REPLACE_ALL,
+                                               "https://some_url.com",
+                                               "random_token", 0)
+    return Response(directives=[play_directive], should_end_session=True)
 
 
-# Handles: SessionEndedRequest
-@echokit.on_session_end
-def session_ended(request_wrapper):
-    print(request_wrapper.request.reason)
+@echokit.audio_player.playback_failed
+def started_playback(request_wrapper):
+    print(request_wrapper.request)
+    print(request_wrapper.session)
+    return Response(directives=[AudioPlayerDirective.stop()])
 
 
-# Handles: IntentRequest
-@echokit.on_intent('HoursIntent')
-def hours_intent(request_wrapper):
-    output_speech = PlainTextOutputSpeech("We're open today from 5am to 8pm")
-    return Response(output_speech=output_speech)
+@echokit.audio_player.exception
+def playback_exc(request_wrapper):
+    print(request_wrapper.request)
+    print(request_wrapper.session)
 
 
-# Handles: IntentRequest
 # This example is for an intent that handles a slot,
 # showing how to access the intent's 'Order' slot.
 # This would return output speech like: 'You asked me to jump'

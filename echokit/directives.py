@@ -1,8 +1,13 @@
-from collections import namedtuple
 from enum import Enum
-import echokit
+from echokit._utils import enum_contains
 
-AudioItem = namedtuple('AudioItem', 'stream')
+
+class AudioItem:
+    def __init__(self, stream):
+        self.stream = stream
+
+    def _dict(self):
+        return {'stream': self.stream._dict()}
 
 
 class Stream:
@@ -13,27 +18,9 @@ class Stream:
         self.offset_in_milliseconds = offset_in_milliseconds
         self.expected_previous_token = expected_previous_token
 
-    def to_json(self):
-        stream_dict = {
-            'token': self.token,
-            'url': self.url,
-            'offsetInMilliseconds': self.offset_in_milliseconds
-        }
-        if self.expected_previous_token:
-            stream_dict['expectedPreviousToken'] = self.expected_previous_token
-
-        return stream_dict
-
-
-class PlayBehavior(Enum):
-    ENQUEUE = 'ENQUEUE'
-    REPLACE_ALL = 'REPLACE_ALL'
-    REPLACE_ENQUEUED = 'REPLACE_ENQUEUED'
-
-
-class ClearBehavior(Enum):
-    CLEAR_ALL = 'CLEAR_ALL'
-    CLEAR_ENQUEUED = 'CLEAR_ENQUEUED'
+    def _dict(self):
+        return {k: v for (k, v) in
+                self.__dict__.items() if v is not None}
 
 
 class AudioPlayerDirective:
@@ -42,22 +29,24 @@ class AudioPlayerDirective:
              expected_previous_token=None):
         stream = Stream(url, token, offset_in_milliseconds,
                         expected_previous_token)
-        return _Play(play_behavior, AudioItem(stream))
+        return PlayDirective(play_behavior, AudioItem(stream))
 
     @staticmethod
     def stop():
-        return _Stop()
+        return StopDirective()
 
     @staticmethod
     def clear_queue(clear_behavior):
-        return _ClearQueue(clear_behavior)
+        return ClearQueueDirective(clear_behavior)
 
 
-class _Play:
-    Behavior = Enum('PlayBehavior', [
-        (a, a) for a in ('ENQUEUE', 'REPLACE_ALL', 'REPLACE_ENQUEUED')
-    ])
+class PlayBehavior(Enum):
+    ENQUEUE = 'ENQUEUE'
+    REPLACE_ALL = 'REPLACE_ALL'
+    REPLACE_ENQUEUED = 'REPLACE_ENQUEUED'
 
+
+class PlayDirective:
     def __init__(self, play_behavior, audio_item):
         self.type = 'AudioPlayer.Play'
         self._play_behavior = None
@@ -72,31 +61,25 @@ class _Play:
     def play_behavior(self, play_behavior):
         if play_behavior in PlayBehavior:
             self._play_behavior = play_behavior
-        elif echokit._in_enum(play_behavior, PlayBehavior):
+        elif enum_contains(play_behavior, PlayBehavior):
             self._play_behavior = PlayBehavior(play_behavior)
         else:
             raise ValueError()
 
-    def to_json(self):
+    def _dict(self):
         return {
             'type': self.type,
-            'playBehavior': self.play_behavior.value,
-            'audioItem': self.audio_item.stream.to_json()
+            'play_behavior': self.play_behavior.value,
+            'audio_item': self.audio_item._dict()
         }
 
 
-class _Stop:
-    def __init__(self):
-        self.type = 'AudioPlayer.Stop'
-
-    def to_json(self):
-        return {'type': self.type}
+class ClearBehavior(Enum):
+    CLEAR_ALL = 'CLEAR_ALL'
+    CLEAR_ENQUEUED = 'CLEAR_ENQUEUED'
 
 
-class _ClearQueue:
-    Behavior = Enum('ClearBehavior', [(a, a) for a in
-                                      ('CLEAR_ALL', 'CLEAR_ENQUEUED')])
-
+class ClearQueueDirective:
     def __init__(self, clear_behavior):
         self.type = 'AudioPlayer.ClearQueue'
         self._clear_behavior = None
@@ -108,16 +91,23 @@ class _ClearQueue:
 
     @clear_behavior.setter
     def clear_behavior(self, clear_behavior):
-        if clear_behavior in ClearQueue.Behavior:
+        if clear_behavior in ClearBehavior:
             self._clear_behavior = clear_behavior
-        elif echokit._in_enum(clear_behavior, ClearQueue.Behavior):
-            self._clear_behavior = ClearQueue.Behavior(clear_behavior)
+        elif enum_contains(clear_behavior, ClearBehavior):
+            self._clear_behavior = ClearBehavior(clear_behavior)
         else:
             raise ValueError()
 
     def to_json(self):
         return {
             'type': self.type,
-            'clearBehavior': self.clear_behavior.value
+            'clear_behavior': self.clear_behavior.value
         }
 
+
+class StopDirective:
+    def __init__(self):
+        self.type = 'AudioPlayer.Stop'
+
+    def _dict(self):
+        return self.__dict__

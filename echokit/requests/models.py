@@ -6,6 +6,7 @@ import logging
 from collections import namedtuple
 from typing import Dict
 
+from echokit.audio_player import AudioPlayer
 
 logger = logging.getLogger(__name__)
 Application = namedtuple('Application', 'application_id')
@@ -27,6 +28,30 @@ attr_map = {
     'offsetInMilliseconds': 'offset_in_milliseconds',
     'playerActivity': 'player_activity'
 }
+#
+# def is_standard(request):
+#     return request['type'] in standard_models
+#
+#
+# def is_intent(request):
+#     return request['type'] == 'IntentRequest'
+#
+#
+# def is_audio_player(request):
+#     return request['type'] in audio_player_models
+#
+#
+# def is_playback_controller(request):
+#     return request['type'] in playback_controller_models
+#
+#
+# def request_type_model(request):
+#     if request['type'] in standard_models:
+#         return standard_models[request['type']].from_json(request)
+#     elif request['type'] in audio_player_models:
+#         return audio_player_models[request['type']].from_json(request)
+#     else:
+#         raise KeyError()
 
 
 class Session:
@@ -56,20 +81,15 @@ class Session:
         self.user = user
 
     @staticmethod
-    def from_json(json_obj):
-        app = Application(json_obj['application']['applicationId'])
-        user = User(json_obj['user']['userId'],
-                    json_obj['user'].get('accessToken'),
-                    json_obj['user'].get('permissions'))
-        session = Session(json_obj['sessionId'], json_obj['new'],
-                          json_obj.get('attributes', {}), app, user)
-        return session
+    def __build(**kwargs):
+        kwargs['application'] = Application(**kwargs['application'])
+        kwargs['user'] = User(**kwargs['user'])
+        return Session(**kwargs)
 
 
 class Context:
     """Data on the current state of the Alexa service/device"""
-
-    def __init__(self, system, audio_player):
+    def __init__(self, system=None, audio_player=None):
         """
         :param system: ``System`` object
         :param audio_player: ``AudioPlayer`` object
@@ -78,28 +98,34 @@ class Context:
         self.audio_player = audio_player
 
     @staticmethod
-    def from_json(json_obj):
-        system = json_obj.get('System')
+    def _build(**kwargs):
+        audio_player = kwargs.get('audio_player')
+        if audio_player:
+            audio_player = AudioPlayer(**audio_player)
+
+        system = kwargs.get('system')
         if system:
-            system = System.from_json(system)
-
-        audio_player = json_obj.get('AudioPlayer')
-
-        context = Context(system, audio_player)
-        return context
+            system = System._build(**system)
+        return Context(system, audio_player)
 
     def to_json(self):
-        context_dict = {'System': self.system.to_json()}
+        context_dict = {'System': self.system._dict()}
         if self.audio_player:
-            context_dict['AudioPlayer'] = self.audio_player.to_json()
+            context_dict['AudioPlayer'] = self.audio_player._dict()
         return context_dict
+
+
+class Device:
+    def __init__(self, device_id=None, supported_interfaces=None):
+        self.device_id = device_id
+        self.supported_interfaces = supported_interfaces
 
 
 class System:
     """Info on the state of Alexa service/device interacting with your skill"""
-    _Device = namedtuple('Device', 'device_id supported_interfaces')
 
-    def __init__(self, application, user, device, api_endpoint):
+    def __init__(self, application=None, user=None, device=None,
+                 api_endpoint=None):
         """
         
         :param application: ``Application`` object
@@ -115,24 +141,20 @@ class System:
         self.api_endpoint = api_endpoint
 
     @staticmethod
-    def from_json(json_obj):
-        application = json_obj.get('application')
-        if application:
-            application = Application(application.get('applicationId'))
+    def _build(**kwargs):
+        app = kwargs.get('application')
+        if app:
+            kwargs['application'] = Application(**app)
 
-        user = json_obj.get('user')
+        user = kwargs.get('user')
         if user:
-            user = User(user.get('userId'), user.get('accessToken'),
-                        user.get('permissions'))
+            kwargs['user'] = User(**user)
 
-        device = json_obj.get('device')
+        device = kwargs.get('device')
         if device:
-            device = System._Device(device.get('deviceId'),
-                                    device.get('supportedInterfaces'))
+            kwargs['device'] = Device(**device)
 
-        api_endpoint = json_obj.get('apiEndpoint')
-        system = System(application, user, device, api_endpoint)
-        return system
+        return System(**kwargs)
 
     def to_json(self):
         sys_dict = {'apiEndpoint': self.api_endpoint}
@@ -142,7 +164,7 @@ class System:
                                        self.application['applicationId']}
 
         if self.user:
-            sys_dict['user'] = self.user.to_json()
+            sys_dict['user'] = self.user._dict()
 
         if self.device:
             sys_dict['device'] = {
@@ -156,7 +178,7 @@ class System:
 class User:
     """Describes a user making a request"""
 
-    def __init__(self, user_id, access_token, permissions):
+    def __init__(self, user_id=None, access_token=None, permissions=None):
         """
 
         :param user_id: User ID generated when user enables skill in 
@@ -177,8 +199,7 @@ class AudioPlayerRequest:
 
 class Intent:
     """Intent provided in ``IntentRequest``"""
-
-    def __init__(self, name, confirmation_status, slots):
+    def __init__(self, name, confirmation_status=None, slots=None):
         """
         
         :param name: Name of the intent
@@ -191,23 +212,23 @@ class Intent:
         """
         self.name = name
         self.confirmation_status = confirmation_status
+
+        if slots is None:
+            slots = {}
         self.slots: Dict[str, Slot] = slots
 
     @staticmethod
-    def from_json(json_obj):
-        json_slots = json_obj.get('slots', {})
-        slots = {}
-        for k, v in json_slots.items():
-            slots[k] = Slot.from_json(v)
-        intent = Intent(json_obj['name'], json_obj.get('confirmationStatus'),
-                        slots)
-        return intent
+    def _build(**kwargs):
+        slots = kwargs.get('slots', {})
+        slot_objs = [Slot(**v) for v in slots.values()]
+        kwargs['slots'] = {s.name: s for s in slot_objs}
+        return Intent(**kwargs)
 
 
 class Slot:
     """``Slot`` present in ``Intent.slots``"""
 
-    def __init__(self, name, value, confirmation_status):
+    def __init__(self, name=None, value=None, confirmation_status=None):
         """
         
         :param name: Slot name
@@ -227,29 +248,3 @@ class Slot:
         return slot
 
 
-# class AudioPlayer:
-#     def __init__(self, token, offset_in_milliseconds, player_activity):
-#         self.token = token
-#         self.offset_in_milliseconds = offset_in_milliseconds
-#         self.player_activity = player_activity
-#
-#     @staticmethod
-#     def from_json(json_obj):
-#         audio_player = AudioPlayer(json_obj.get('token'),
-#                                    json_obj.get('offsetInMilliseconds'),
-#                                    json_obj.get('playerActivity'))
-#         set_unknown(json_obj, audio_player)
-#         return audio_player
-#
-#     def to_json(self):
-#         ap_dict = {
-#             'token': self.token,
-#             'offsetInMilliseconds': self.offset_in_milliseconds,
-#             'playerActivity': self.player_activity
-#         }
-#         return {k: v for (k, v) in ap_dict.items() if v is not None}
-#
-#
-# class AudioPlayerDirective:
-#     def __init__(self):
-#         pass
