@@ -2,12 +2,13 @@ import logging
 
 handler_funcs = {}
 
-from echokit import requests
-from echokit.responses import Response
-from echokit.speech import PlainTextOutputSpeech
 from echokit._utils import convert_keys, revert_keys
 
 logger = logging.getLogger(__name__)
+
+LAUNCH = 'LaunchRequest'
+SESSION_ENDED = 'SessionEndedRequest'
+INTENT = 'IntentRequest'
 
 
 def handler(event, context):
@@ -26,12 +27,9 @@ def handler(event, context):
     logger.info(f"Mem. limits(MB): {context.memory_limit_in_mb}")
 
     convert_keys(event)
-    request_wrapper = requests.RequestWrapper(event.get('request'),
-                                              event.get('session'),
-                                              event.get('context'),
-                                              event.get('version'))
-    handler_func = _get_handler(event['request'])
-    response = handler_func(request_wrapper)
+    ask_request = requests.ASKRequest(**event)
+    handler_func = _get_handler(ask_request.request)
+    response = handler_func(ask_request)
     # Won't always receive responses (ex: SessionEndedRequest)
     if response is not None:
         response_dict = response._dict()
@@ -39,15 +37,33 @@ def handler(event, context):
         return response_dict
 
 
-def fallback_default(request_wrapper):
-    """Default handler for valid intent names without handlers"""
-    speech = PlainTextOutputSpeech("Sorry, I didn't understand your request")
-    return Response(output_speech=speech)
+# def fallback_default(request_wrapper):
+#     """Default handler for valid intent names without handlers"""
+#     speech = PlainTextOutputSpeech("Sorry, I didn't understand your request")
+#     return Response(output_speech=speech)
 
 
 def _get_handler(request):
-    if request['type'] == requests.INTENT:
-        func = handler_funcs.get(request['intent']['name'], fallback_default)
+    if request.type == requests.INTENT:
+        func = handler_funcs.get(request.intent.name, fallback_default)
     else:
-        func = handler_funcs[request['type']]
+        func = handler_funcs[request.type]
     return func
+
+
+def on_session_launch(func):
+    handler_funcs[LAUNCH] = func
+
+
+def on_session_end(func):
+    handler_funcs[SESSION_ENDED] = func
+
+
+def on_intent(intent_name):
+    def func_wrapper(func):
+        handler_funcs[intent_name] = func
+    return func_wrapper
+
+
+def fallback(func):
+    fallback_default = func

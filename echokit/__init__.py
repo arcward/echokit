@@ -16,5 +16,5 @@ from echokit.request_handler import handler
 # Decorators
 from echokit.requests import on_session_launch, on_session_end, \
     on_intent, fallback
-from echokit.responses import Response, ask, tell, Card as card
-from echokit.speech import PlainTextOutputSpeech
+from echokit.responses import Response, ask, tell, Card as card, \
+    PlainTextOutputSpeech

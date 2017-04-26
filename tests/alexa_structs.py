@@ -1,7 +1,6 @@
 from collections import namedtuple
 import echokit
-from echokit import Response
-from echokit.speech import PlainTextOutputSpeech
+from echokit import Response, PlainTextOutputSpeech
 from echokit.directives import PlayBehavior, AudioPlayerDirective
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
