@@ -29,7 +29,23 @@ def session_ended(request_wrapper):
 # Handles: IntentRequest
 @echokit.on_intent('HoursIntent')
 def hours_intent(request_wrapper):
-    return echokit.tell("We're open 5AM to 8PM!")
+    return echokit.tell("We're open 5AM to 8PM!") \
+        .simple_card(title="Hours", content="5AM-8PM")
+
+
+@echokit.on_intent('SanicIntent')
+def sanic_intent(request_wrapper):
+    return echokit.tell("Gotta go fast")\
+        .standard_card(title="Sanic", text="Gotta go fast",
+                       large_image_url="https://i.imgur.com/PytSZCG.png")
+
+
+@echokit.on_intent('SsmlIntent')
+def ssml_intent(request_wrapper):
+    ssml = ("<speak>Onomatopoeia: "
+            "<say-as interpret-as=\"spell-out\">onomatopoeia</say-as>."
+            "</speak>")
+    return echokit.tell(speech=ssml, ssml=True)
 
 
 # Handles: IntentRequest
@@ -45,7 +61,6 @@ def order_intent(request_wrapper):
         .simple_card(title="Previous order", content=menu_item)
 
 
-
 # Handles: IntentRequest (unimplemented intent)
 # For example, if 'WeaveBasketIntent' is defined in your
 # interaction model, but you haven't defined a handler
@@ -55,5 +70,4 @@ def order_intent(request_wrapper):
 # understand your request" speech response.
 @echokit.fallback
 def unimplemented(request_wrapper):
-    return echokit.tell(f"Sorry, {request_wrapper.request.intent.name} "
-                        f"hasn't been implemented yet!")
+    return echokit.ask(speech="What did you say?", reprompt="Hello?")

@@ -1,14 +1,9 @@
 import logging
-from echokit._utils import convert_keys, revert_keys
 from echokit.constants import INTENT_REQUEST, LAUNCH_REQUEST, \
     SESSION_ENDED_REQUEST
 from echokit.models import ASKObject
-from echokit.responses import tell
-
 
 logger = logging.getLogger(__name__)
-
-
 handler_funcs = {}
 
 
@@ -36,16 +31,15 @@ def handler(event, context):
         return response_dict
 
 
-def fallback_default(request_wrapper):
-    """Default handler for valid intent names without handlers"""
-    return tell("Sorry, I didn't understand your request")
-
-
 def _get_handler(request):
     if request.type == INTENT_REQUEST:
-        func = handler_funcs.get(request.intent.name, fallback_default)
+        func = handler_funcs.get(request.intent.name)
+        if not func:
+            func = handler_funcs.get('fallback')
     else:
-        func = handler_funcs[request.type]
+        func = handler_funcs.get(request.type)
+        if not func:
+            raise KeyError(f"No handler for request type: {request.type}")
     return func
 
 
@@ -64,4 +58,4 @@ def on_intent(intent_name):
 
 
 def fallback(func):
-    fallback_default = func
+    handler_funcs['fallback'] = func

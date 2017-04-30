@@ -56,19 +56,6 @@ class TestRequests(TestCase):
                            'text': "I did something with SomeIntent!"}
         self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
 
-    def test_fallback_intent(self):
-        weird_intent = create_intent('WeirdIntent', new=True)
-        r = echokit.handler(weird_intent, mock_context)
-
-        for ek in self.basic_response_keys:
-            self.assertIn(ek, r.keys())
-
-        self.assertEqual(r['version'], '1.0')
-
-        expected_speech = {'type': 'PlainText',
-                           'text': "Sorry, I didn't understand your request"}
-        self.assertEqual(expected_speech, r['response']['outputSpeech'])
-
     def test_play_directive(self):
         r = echokit.handler(resume_json, mock_context)
         print(r)

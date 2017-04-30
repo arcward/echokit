@@ -3,17 +3,25 @@
 The ``Response`` object is what you'll return to the Alexa service. It 
 will contain your ``OutputSpeech``, ``Card``, ``Reprompt``...
 """
-from echokit.models import _Response, ASKResponse
+from echokit.models import ASKResponse
 
 
-def ask(speech, reprompt=None):
-    return ASKResponse(speech=speech,  reprompt=reprompt,
-                       should_end_session=False)
+def ask(speech, reprompt=None, ssml=False):
+    if ssml:
+        response = ASKResponse(ssml=speech, reprompt=reprompt,
+                               should_end_session=False)
+    else:
+        response = ASKResponse(speech=speech,  reprompt=reprompt,
+                               should_end_session=False)
+    return response
 
 
-def tell(speech):
-    ar = ASKResponse(speech=speech, should_end_session=True)
-    return ar
+def tell(speech, ssml=False):
+    if ssml:
+        response = ASKResponse(ssml=speech, should_end_session=True)
+    else:
+        response = ASKResponse(speech=speech, should_end_session=True)
+    return response
 
 
 class AudioPlayerResponse:

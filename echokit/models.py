@@ -47,7 +47,10 @@ class ASKResponse(ASKObject):
         if ssml:
             self.ssml(ssml)
         if reprompt:
-            self.reprompt(reprompt)
+            if ssml:
+                self.reprompt(reprompt, True)
+            else:
+                self.reprompt(reprompt, False)
         self.sessionAttributes = {}
         if session_attributes:
             self.session_attributes(session_attributes)

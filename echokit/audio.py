@@ -29,4 +29,3 @@ def playback_failed(func):
 
 def exception(func):
     handler_funcs[EXCEPTION_ENCOUNTERED] = func
-
