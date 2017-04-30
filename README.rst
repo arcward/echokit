@@ -78,11 +78,10 @@ Example
         output_speech = PlainTextOutputSpeech("Hello!")
         return Response(output_speech=output_speech)
 
-    @echokit.on_session_ended
+    @echokit.on_session_end
     def end_session(request, session):
-        output_speech = PlainTextOutputSpeech("Goodbye!")
-        simple_card = SimpleCard(title="Goodbye", content="Seeya!")
-        return Response(output_speech=output_speech, card=simple_card)
+        # Can't return a response to SessionEndedRequest
+        print(request.intent.reason)
 
     @echokit.on_intent('OrderIntent')
     def send_order(request, session):
