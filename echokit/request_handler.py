@@ -27,13 +27,12 @@ def handler(event, context):
     logger.info(f"RequestWrapper ID: {context.aws_request_id}")
     logger.info(f"Mem. limits(MB): {context.memory_limit_in_mb}")
 
-    ask_request = ASKObject(event)
+    ask_request = ASKObject(**event)
     handler_func = _get_handler(ask_request.request)
     response = handler_func(ask_request)
     # Won't always receive responses (ex: SessionEndedRequest)
     if response is not None:
         response_dict = response._dict()
-        revert_keys(response_dict)
         return response_dict
 
 

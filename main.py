@@ -1,6 +1,4 @@
 import echokit
-from echokit import Response, PlainTextOutputSpeech, SimpleCard
-from echokit import directives, audio_player
 
 # In the Lambda config, 'handler' would be
 # set to ``order_skill.handler``
@@ -43,7 +41,7 @@ def hours_intent(request_wrapper):
 def order_intent(request_wrapper):
     request = request_wrapper.request
     menu_item = request.intent.slots['MenuItem'].value
-    return echokit.tell(f"You last ordered {menu_item}")\
+    return echokit.tell(f"You just ordered {menu_item}")\
         .simple_card(title="Previous order", content=menu_item)
 
 

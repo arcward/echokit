@@ -229,6 +229,7 @@ def playback_failed(request_wrapper):
     print(request)
     print(context)
 
+
 @echokit.on_session_launch
 def start_ses(request_wrapper):
     return echokit.tell('You started a new session!')
@@ -254,8 +255,8 @@ def specific_intent(request_wrapper):
     request = request_wrapper.request
     asdf = request.intent.slots
     order = request.intent.slots['Order']
-    session_attrs = {'last_order': order}
-    response_text = f'You asked me to {order}'
+    session_attrs = {'last_order': order.value}
+    response_text = f'You asked me to {order.value}'
     img_url = "http://i.imgur.com/PytSZCG.png"
 
     return echokit.tell(response_text)\

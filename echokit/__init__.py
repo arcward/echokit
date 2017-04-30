@@ -12,4 +12,4 @@ logger.setLevel(logging.INFO)
 application_id = None
 
 #: If True, will verify app ID in each request (raising exceptions if needed)
-verify_application_id = True12
+verify_application_id = True

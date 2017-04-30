@@ -12,7 +12,8 @@ def ask(speech, reprompt=None):
 
 
 def tell(speech):
-    return ASKResponse(speech=speech, should_end_session=True)
+    ar = ASKResponse(speech=speech, should_end_session=True)
+    return ar
 
 
 class AudioPlayerResponse:

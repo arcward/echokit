@@ -2,19 +2,18 @@ from enum import Enum
 
 
 class ASKObject(dict):
-    def __init__(self, kwargs):
+    def __init__(self, **kwargs):
         super().__init__(kwargs)
         for k, v in dict(kwargs).items():
-            if k == 'order':
-                print('wtf')
             if isinstance(v, dict):
-                v = ASKObject(v)
+                v = ASKObject(**v)
             self[k] = v
 
     def _dict(self):
-        d = self.__dict__
+        d = dict(self)
         for k, v in dict(d).items():
             if isinstance(v, ASKObject):
+                print(type(v))
                 d[k] = v._dict()
         return d
 
@@ -25,30 +24,14 @@ class ASKObject(dict):
         return self.get(attr)
 
 
-class ASKRequest(ASKObject):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
 class _Response(ASKObject):
     def __init__(self, outputSpeech=None, card=None, reprompt=None,
                  shouldEndSession=None, directives=None):
         if not directives:
             directives = []
-        super().__init__(outputSpeech=outputSpeech, card=card,
-                         reprompt=reprompt, shouldEndSession=shouldEndSession,
+        super().__init__(outputSpeech=outputSpeech, reprompt=reprompt,
+                         card=card, shouldEndSession=shouldEndSession,
                          directives=directives)
-
-
-# class AudioPlayerResponse(ASKObject):
-#     def __init__(self, directives, version='1.0'):
-#         if not directives:
-#             directives = []
-#         super().__init__(directives=directives, version=version)
-#
-#     play = ASKResponse.play_audio
-#     stop = ASKResponse.stop_audio
-#     clear_queue = ASKResponse.clear_audio_queue
 
 
 class ASKResponse(ASKObject):
@@ -63,7 +46,6 @@ class ASKResponse(ASKObject):
             self.speech(speech)
         if ssml:
             self.ssml(ssml)
-dfsdkjfh dsflsdkdf dkfjdf sdkfjsdf jedkfdkfk rtgo4efisdj rtjsdfij efo
         if reprompt:
             self.reprompt(reprompt)
         self.sessionAttributes = {}
@@ -116,15 +98,14 @@ dfsdkjfh dsflsdkdf dkfjdf sdkfjsdf jedkfdkfk rtgo4efisdj rtjsdfij efo
 
     def play_audio(self, behavior, url, token, offset_in_milliseconds=0,
                    expected_previous_token=None):
-        audio_item = {
-            'audioItem':
-                {'stream': {
-                    'url': url,
-                    'token': token,
-                    'offsetInMilliseconds': offset_in_milliseconds,
-                    'expectedPreviousToken': expected_previous_token
-                }}
-        }
+        audio_item = {'audioItem': {
+            'stream': {
+                'url': url,
+                'token': token,
+                'offsetInMilliseconds': offset_in_milliseconds,
+                'expectedPreviousToken': expected_previous_token
+            }
+        }}
         directive = Directive(type='AudioPlayer.Play', playBehavior=behavior,
                               audioItem=audio_item)
         self.response.directives.append(directive)
@@ -135,7 +116,7 @@ dfsdkjfh dsflsdkdf dkfjdf sdkfjsdf jedkfdkfk rtgo4efisdj rtjsdfij efo
         return self
 
     def clear_audio_queue(self, behavior):
-        self.response.directives\
+        self.response.directives \
             .append(ASKObject(type='AudioPlayer.ClearQueue',
                               clearBehavior=behavior.value))
         return self
