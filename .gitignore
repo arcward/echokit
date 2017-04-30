@@ -98,4 +98,6 @@ ENV/
 .idea/
 tests/skill/
 main_test.py
+main.py
+main_audio.py
 *.zip

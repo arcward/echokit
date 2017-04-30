@@ -1,7 +1,5 @@
 from collections import namedtuple
 import echokit
-from echokit import Response, PlainTextOutputSpeech
-from echokit.directives import PlayBehavior, AudioPlayerDirective
 
 Context = namedtuple('Context', 'log_stream_name log_group_name '
                                 'aws_request_id memory_limit_in_mb')
@@ -231,22 +229,14 @@ def playback_failed(request_wrapper):
     print(request)
     print(context)
 
-
-@echokit.on_intent('AMAZON.ResumeIntent')
-def resume_audio(request_wrapper):
-    return AudioPlayerDirective.play(PlayBehavior.REPLACE_ALL,
-                                     "https://url.com", "some_token", 0)
+@echokit.on_session_launch
+def start_ses(request_wrapper):
+    return echokit.tell('You started a new session!')
 
 
 @echokit.on_intent('AMAZON.PauseIntent')
 def pause_audio(request_wrapper):
     pass
-
-
-@echokit.on_session_launch
-def session_started(request_wrapper):
-    output_speech = PlainTextOutputSpeech("You started a new session!")
-    return Response(output_speech=output_speech)
 
 
 @echokit.on_session_end
@@ -256,32 +246,25 @@ def session_ended(request_wrapper):
 
 @echokit.on_intent('SomeIntent')
 def on_intent(request_wrapper):
-    output_speech = PlainTextOutputSpeech("I did something with SomeIntent!")
-    return Response(output_speech=output_speech)
+    return echokit.tell('I did something with SomeIntent!')
 
 
 @echokit.on_intent('OrderIntent')
 def specific_intent(request_wrapper):
     request = request_wrapper.request
-    context = request_wrapper.context
-    order = request.intent.slots['Order'].value
+    asdf = request.intent.slots
+    order = request.intent.slots['Order']
     session_attrs = {'last_order': order}
     response_text = f'You asked me to {order}'
-    card = echokit.StandardCard(
-        title="Order",
-        text=response_text,
-        small_image_url="http://i.imgur.com/PytSZCG.png",
-        large_image_url="http://i.imgur.com/PytSZCG.png"
-    )
-    return Response(output_speech=PlainTextOutputSpeech(response_text),
-                    session_attributes=session_attrs, card=card)
+    img_url = "http://i.imgur.com/PytSZCG.png"
+
+    return echokit.tell(response_text)\
+        .standard_card("Order", response_text, img_url, img_url)\
+        .session_attributes(session_attrs)
 
 
 @echokit.fallback
 def unimplemented(request_wrapper):
     request = request_wrapper.request
-    context = request_wrapper.context
     intent_name = request.intent.name
-    output_speech = PlainTextOutputSpeech(f"Sorry, {intent_name} isn't "
-                                          f"implemented!")
-    return Response(output_speech)
+    return echokit.tell(f"Sorry, {intent_name} isn't implemented!")

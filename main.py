@@ -19,8 +19,7 @@ echokit.verify_application_id = False
 # Handles: LaunchRequest
 @echokit.on_session_launch
 def session_started(request_wrapper):
-    output_speech = PlainTextOutputSpeech("Welcome to Order Maker!")
-    return Response(output_speech=output_speech)
+    return echokit.ask('Welcome to Order Maker! WATCHU WANT?')
 
 
 # Handles: SessionEndedRequest
@@ -32,8 +31,7 @@ def session_ended(request_wrapper):
 # Handles: IntentRequest
 @echokit.on_intent('HoursIntent')
 def hours_intent(request_wrapper):
-    output_speech = PlainTextOutputSpeech("We're open today from 5am to 8pm")
-    return Response(output_speech=output_speech)
+    return echokit.tell("We're open 5AM to 8PM!")
 
 
 # Handles: IntentRequest
@@ -45,11 +43,9 @@ def hours_intent(request_wrapper):
 def order_intent(request_wrapper):
     request = request_wrapper.request
     menu_item = request.intent.slots['MenuItem'].value
-    response_text = f'You ordered: {menu_item}'
-    card = SimpleCard(title="Order", content=response_text)
-    return Response(output_speech=PlainTextOutputSpeech(response_text),
-                    session_attributes={'last_order': menu_item},
-                    card=card)
+    return echokit.tell(f"You last ordered {menu_item}")\
+        .simple_card(title="Previous order", content=menu_item)
+
 
 
 # Handles: IntentRequest (unimplemented intent)
@@ -61,9 +57,5 @@ def order_intent(request_wrapper):
 # understand your request" speech response.
 @echokit.fallback
 def unimplemented(request_wrapper):
-    request = request_wrapper.request
-    output_speech = PlainTextOutputSpeech(f"Sorry, {request.intent.name} "
-                                          f"isn't implemented!")
-    return Response(output_speech=output_speech)
-
-0
+    return echokit.tell(f"Sorry, {request_wrapper.request.intent.name} "
+                        f"hasn't been implemented yet!")

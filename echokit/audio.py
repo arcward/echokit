@@ -1,15 +1,10 @@
 """AudioPlayer interface implementation
 https://developer.amazon.com/public/solutions/alexa/alexa-skills-kit/docs/custom-audioplayer-interface-reference
 """
-from enum import Enum
 from echokit.request_handler import handler_funcs
-
-PLAYBACK_STARTED = 'AudioPlayer.PlaybackStarted'
-PLAYBACK_FINISHED = 'AudioPlayer.PlaybackFinished'
-PLAYBACK_STOPPED = 'AudioPlayer.PlaybackStopped'
-PLAYBACK_NEARLY_FINISHED = 'AudioPlayer.PlaybackNearlyFinished'
-PLAYBACK_FAILED = 'AudioPlayer.PlaybackFailed'
-EXCEPTION_ENCOUNTERED = 'System.ExceptionEncountered'
+from echokit.constants import PLAYBACK_STARTED, PLAYBACK_FAILED, \
+    PLAYBACK_FINISHED, PLAYBACK_NEARLY_FINISHED, PLAYBACK_STOPPED, \
+    EXCEPTION_ENCOUNTERED
 
 
 def playback_started(func):
