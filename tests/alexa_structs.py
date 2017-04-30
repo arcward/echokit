@@ -152,8 +152,7 @@ def session_started(request, session):
 
 @echokit.on_session_end
 def session_ended(request, session):
-    output_speech = PlainTextOutputSpeech("You ended our session :[")
-    return Response(output_speech=output_speech)
+    print(request.reason)
 
 
 @echokit.on_intent('SomeIntent')

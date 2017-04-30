@@ -58,10 +58,11 @@ def handler(event, context):
         resp = request_handlers.get(request.request_type)
 
     # Final return to Alexa service
-    resp_json = resp(request, session).to_json()
-    logger.info(f"Response: {resp_json}")
-    return resp_json
-
+    handler_resp = resp(request, session)
+    logger.info(f"Response: {handler_resp}")
+    if handler_resp:
+        handler_resp = handler_resp.to_json()
+    return handler_resp
 
 # Decorators to register functions to handle requests. Ex:
 #   @echokit.on_session_launch
