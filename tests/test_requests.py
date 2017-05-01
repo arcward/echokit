@@ -1,5 +1,6 @@
 from unittest import TestCase
-from tests.alexa_structs import *
+from tests.mock_requests import SESSION_ENDED_REQUEST, LAUNCH_REQUEST
+from tests.mock_skill import *
 
 
 class TestRequests(TestCase):
@@ -9,26 +10,24 @@ class TestRequests(TestCase):
         self.basic_response_keys = ['version', 'response']
 
     def test_start_session(self):
-        r = echokit.handler(start_session, mock_context)
+        r = echokit.handler(LAUNCH_REQUEST, mock_context)
         expected_speech = {'type': 'PlainText',
                            'text': 'You started a new session!'}
         self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
 
     def test_end_session(self):
-        self.assertIsNone(echokit.handler(end_session, mock_context))
+        self.assertIsNone(echokit.handler(SESSION_ENDED_REQUEST, mock_context))
 
     def test_order_intent(self):
         order_intent = create_intent('OrderIntent', new=False,
                                      slots={"Order": {"name": "Order",
                                                       "value": "jump"}})
         r = echokit.handler(order_intent, mock_context)
-        print(r)
         for ek in self.basic_response_keys:
             self.assertIn(ek, r.keys())
         self.assertEqual(r['version'], '1.0')
 
         expected_attrs = {'last_order': 'jump'}
-
         self.assertDictEqual(expected_attrs, r['sessionAttributes'])
 
         expected_speech = {'type': 'PlainText', 'text': 'You asked me to jump'}
@@ -46,16 +45,103 @@ class TestRequests(TestCase):
     def test_some_intent(self):
         some_intent = create_intent('SomeIntent', new=False)
         r = echokit.handler(some_intent, mock_context)
+        self.assertEqual(r['version'], '1.0')
 
         for ek in self.basic_response_keys:
             self.assertIn(ek, r.keys())
-
-        self.assertEqual(r['version'], '1.0')
 
         expected_speech = {'type': 'PlainText',
                            'text': "I did something with SomeIntent!"}
         self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
 
-    def test_play_directive(self):
-        r = echokit.handler(resume_json, mock_context)
-        print(r)
+
+class Expected:
+    SESSION_STARTED = {
+        "response": {
+            "outputSpeech": {
+                "type": "PlainText",
+                "text": "Welcome to Order Maker! WATCHU WANT?"
+            },
+            "reprompt": None,
+            "card": None,
+            "shouldEndSession": False,
+            "directives": []
+        },
+        "version": "1.0",
+        "sessionAttributes": {}
+    }
+    HOURS_INTENT = {
+        "version": "1.0",
+        "response": {
+            "outputSpeech": {
+              "type": "PlainText",
+              "text": "We're open 5AM to 8PM!"
+            },
+            "card": {
+              "content": "5AM-8PM",
+              "title": "Hours",
+              "type": "Simple"
+            },
+            "shouldEndSession": True
+        },
+        "sessionAttributes": {}
+    }
+    SSML_INTENT = {
+        "version": "1.0",
+        "response": {
+            "outputSpeech": {
+                "type": "SSML",
+                "ssml": ("<speak>Onomatopoeia: <say-as "
+                         "interpret-as=\"spell-out\">onomatopoeia</say-as>."
+                         "</speak>")
+            },
+            "shouldEndSession": True
+        },
+        "sessionAttributes": {}
+    }
+    SANIC_INTENT = {
+      "version": "1.0",
+      "response": {
+        "outputSpeech": {
+          "type": "PlainText",
+          "text": "Gotta go fast"
+        },
+        "card": {
+          "text": "Gotta go fast",
+          "title": "Sanic",
+          "image": {
+            "largeImageUrl": "https://i.imgur.com/PytSZCG.png"
+          },
+          "type": "Standard"
+        },
+        "shouldEndSession": True
+      },
+      "sessionAttributes": {}
+    }
+    ORDER_INTENT = {
+          "version": "1.0",
+          "response": {
+            "outputSpeech": {
+              "type": "PlainText",
+              "text": "You just ordered spaghetti"
+            },
+            "card": {
+              "content": "spaghetti",
+              "title": "Previous order",
+              "type": "Simple"
+            },
+            "shouldEndSession": True
+          },
+          "sessionAttributes": {}
+        }
+    FALLBACK_DEFAULT = {
+          "version": "1.0",
+          "response": {
+            "outputSpeech": {
+              "type": "PlainText",
+              "text": "I wasn't able to process your request"
+            },
+            "shouldEndSession": True
+          },
+          "sessionAttributes": {}
+        }

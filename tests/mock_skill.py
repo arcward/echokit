@@ -1,18 +1,5 @@
 import echokit
 
-# In the Lambda config, 'handler' would be
-# set to ``order_skill.handler``
-handler = echokit.handler
-
-# Your skill ID, as provided in the Alexa dev portal
-echokit.verify_application_id = False
-
-
-# All apps are required to handle three basic requests,
-# which have their own decorators:
-# * LaunchRequest:          @echokit.on_session_launch
-# * SessionEndedRequest:    @echokit.on_session_ended
-# * IntentRequest:          @echokit.on_intent('your_intent_name')
 
 # Handles: LaunchRequest
 @echokit.on_session_launch
@@ -48,11 +35,6 @@ def ssml_intent(request_wrapper):
     return echokit.tell(speech=ssml, ssml=True)
 
 
-# Handles: IntentRequest
-# This example is for an intent that handles a slot,
-# showing how to access the intent's 'Order' slot.
-# This would return output speech like: 'You asked me to jump'
-# The session variable would be returned on the next invocation
 @echokit.on_intent('OrderIntent')
 def order_intent(request_wrapper):
     request = request_wrapper.request
@@ -60,14 +42,6 @@ def order_intent(request_wrapper):
     return echokit.tell(f"You just ordered {menu_item}")\
         .simple_card(title="Previous order", content=menu_item)
 
-
-# Handles: IntentRequest (unimplemented intent)
-# For example, if 'WeaveBasketIntent' is defined in your
-# interaction model, but you haven't defined a handler
-# for it with @echokit.on_intent('WeaveBasketIntent'),
-# this will catch it. If you don't define your own here,
-# by default echokit will return a "Sorry, I didn't
-# understand your request" speech response.
-@echokit.fallback
-def unimplemented(request_wrapper):
-    return echokit.ask(speech="What did you say?", reprompt="Hello?")
+# @echokit.fallback
+# def unimplemented(request_wrapper):
+#     return echokit.ask(speech="What did you say?", reprompt="Hello?")
