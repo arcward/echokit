@@ -63,8 +63,17 @@ def on_intent(intent_name):
     return func_wrapper
 
 
-def slot(name, values=None):
-    pass
+def slot(name):
+    def slot_checker(func):
+        def handler_func(request_wrapper):
+            s = request_wrapper.request.intent.slots[name]
+            # if s.value not in values:
+            #     raise ValueError(f"Unexpected value for '{name}'. "
+            #                      f"Received: '{s.value}'. "
+            #                      f"Expected: {values}")
+            return func(request_wrapper, s.value)
+        return handler_func
+    return slot_checker
 
 
 def fallback(func):

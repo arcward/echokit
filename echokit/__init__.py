@@ -1,6 +1,6 @@
 """Handles initial requests/logging"""
 from echokit.handler import handler, on_session_launch, \
-    on_session_ended, on_intent, fallback
+    on_session_ended, on_intent, fallback, slot
 from echokit.models import ASKResponse
 
 #: Skill's application ID, found in the Alexa dev portal
