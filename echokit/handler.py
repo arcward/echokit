@@ -63,6 +63,10 @@ def on_intent(intent_name):
     return func_wrapper
 
 
+def slot(name, values=None):
+    pass
+
+
 def fallback(func):
     """Unhandled IntentRequest decorator"""
     __handler_funcs['fallback'] = func
@@ -74,4 +78,5 @@ def __fallback_default(request_wrapper):
               f"{request_wrapper.request.intent.name}")
     else:
         print(f"WARNING: No handler found for {request_wrapper.request.type}")
-    return ASKResponse().speech("I wasn't able to process your request")
+    return ASKResponse(should_end_session=True)\
+        .speech("I wasn't able to process your request")

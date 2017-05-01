@@ -1,5 +1,4 @@
 """Handles initial requests/logging"""
-import logging
 from echokit.handler import handler, on_session_launch, \
     on_session_ended, on_intent, fallback
 from echokit.models import ASKResponse

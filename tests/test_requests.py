@@ -1,6 +1,6 @@
 from unittest import TestCase
-from tests.mock_requests import SESSION_ENDED_REQUEST, LAUNCH_REQUEST
 from tests.mock_skill import *
+from tests.mock_requests import *
 
 
 class TestRequests(TestCase):
@@ -8,51 +8,34 @@ class TestRequests(TestCase):
         echokit.application_id = "amzn1.ask.skill.[unique-value-here]"
         echokit.verify_application_id = False
         self.basic_response_keys = ['version', 'response']
+        self.context = CONTEXT
+        self.order_intent = build_intent('OrderIntent', new=False,
+                                         slots=build_slot('MenuItem',
+                                                          'spaghetti'))
+        self.sanic_intent = build_intent('SanicIntent')
+        self.hours_intent = build_intent('HoursIntent')
+        self.ssml_intent = build_intent('SsmlIntent')
+        self.unknown_intent = build_intent('UnknownIntent')
 
     def test_start_session(self):
-        r = echokit.handler(LAUNCH_REQUEST, mock_context)
-        expected_speech = {'type': 'PlainText',
-                           'text': 'You started a new session!'}
-        self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
+        r = echokit.handler(LAUNCH_REQUEST, CONTEXT)
+        self.assertDictEqual(r, Expected.SESSION_STARTED)
 
     def test_end_session(self):
-        self.assertIsNone(echokit.handler(SESSION_ENDED_REQUEST, mock_context))
+        self.assertIsNone(echokit.handler(SESSION_ENDED_REQUEST, CONTEXT))
 
     def test_order_intent(self):
-        order_intent = create_intent('OrderIntent', new=False,
-                                     slots={"Order": {"name": "Order",
-                                                      "value": "jump"}})
-        r = echokit.handler(order_intent, mock_context)
-        for ek in self.basic_response_keys:
-            self.assertIn(ek, r.keys())
-        self.assertEqual(r['version'], '1.0')
+        r = echokit.handler(self.order_intent, CONTEXT)
+        self.assertDictEqual(r, Expected.ORDER_INTENT)
 
-        expected_attrs = {'last_order': 'jump'}
-        self.assertDictEqual(expected_attrs, r['sessionAttributes'])
+    def test_ssml_intent(self):
+        r = echokit.handler(self.ssml_intent, CONTEXT)
+        self.assertDictEqual(r,
+                             Expected.SSML_INTENT)
 
-        expected_speech = {'type': 'PlainText', 'text': 'You asked me to jump'}
-        self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
-
-        expected_card = {'type': 'Standard',
-                         'title': 'Order',
-                         'text': 'You asked me to jump',
-                         'image': {
-                             'smallImageUrl': 'http://i.imgur.com/PytSZCG.png',
-                             'largeImageUrl': 'http://i.imgur.com/PytSZCG.png'
-                         }}
-        self.assertDictEqual(expected_card, r['response']['card'])
-
-    def test_some_intent(self):
-        some_intent = create_intent('SomeIntent', new=False)
-        r = echokit.handler(some_intent, mock_context)
-        self.assertEqual(r['version'], '1.0')
-
-        for ek in self.basic_response_keys:
-            self.assertIn(ek, r.keys())
-
-        expected_speech = {'type': 'PlainText',
-                           'text': "I did something with SomeIntent!"}
-        self.assertDictEqual(expected_speech, r['response']['outputSpeech'])
+    def test_unknown_intent(self):
+        r = echokit.handler(self.unknown_intent, CONTEXT)
+        self.assertDictEqual(r, Expected.FALLBACK_DEFAULT)
 
 
 class Expected:
@@ -62,10 +45,7 @@ class Expected:
                 "type": "PlainText",
                 "text": "Welcome to Order Maker! WATCHU WANT?"
             },
-            "reprompt": None,
-            "card": None,
             "shouldEndSession": False,
-            "directives": []
         },
         "version": "1.0",
         "sessionAttributes": {}

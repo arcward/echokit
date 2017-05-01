@@ -17,6 +17,8 @@ class _ASKObject(dict):
             if isinstance(v, _ASKObject):
                 print(type(v))
                 d[k] = v._dict()
+            elif v is None:
+                del d[k]
         return d
 
     def __setattr__(self, key, value):
@@ -31,8 +33,6 @@ class _Response(_ASKObject):
     """Response object contained in response body"""
     def __init__(self, outputSpeech=None, card=None, reprompt=None,
                  shouldEndSession=None, directives=None):
-        if not directives:
-            directives = []
         super().__init__(outputSpeech=outputSpeech, reprompt=reprompt,
                          card=card, shouldEndSession=shouldEndSession,
                          directives=directives)
