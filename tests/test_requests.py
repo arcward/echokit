@@ -8,33 +8,31 @@ class TestRequests(TestCase):
         echokit.application_id = "amzn1.ask.skill.[unique-value-here]"
         echokit.verify_application_id = False
         self.basic_response_keys = ['version', 'response']
-        self.context = CONTEXT
-        self.order_intent = build_intent('OrderIntent', new=False,
-                                         slots=build_slot('MenuItem',
-                                                          'spaghetti'))
         self.sanic_intent = build_intent('SanicIntent')
         self.hours_intent = build_intent('HoursIntent')
         self.ssml_intent = build_intent('SsmlIntent')
         self.unknown_intent = build_intent('UnknownIntent')
+        self.order_intent = build_intent('OrderIntent', slots=build_slot(
+            'MenuItem', 'spaghetti'), new=False)
 
     def test_start_session(self):
-        r = echokit.handler(LAUNCH_REQUEST, CONTEXT)
+        r = echokit.handler(LAUNCH_REQUEST, MockContext)
         self.assertDictEqual(r, Expected.SESSION_STARTED)
 
     def test_end_session(self):
-        self.assertIsNone(echokit.handler(SESSION_ENDED_REQUEST, CONTEXT))
+        r = echokit.handler(SESSION_ENDED_REQUEST, MockContext)
+        self.assertIsNone(r)
 
     def test_order_intent(self):
-        r = echokit.handler(self.order_intent, CONTEXT)
+        r = echokit.handler(self.order_intent, MockContext)
         self.assertDictEqual(r, Expected.ORDER_INTENT)
 
     def test_ssml_intent(self):
-        r = echokit.handler(self.ssml_intent, CONTEXT)
-        self.assertDictEqual(r,
-                             Expected.SSML_INTENT)
+        r = echokit.handler(self.ssml_intent, MockContext)
+        self.assertDictEqual(r, Expected.SSML_INTENT)
 
     def test_unknown_intent(self):
-        r = echokit.handler(self.unknown_intent, CONTEXT)
+        r = echokit.handler(self.unknown_intent, MockContext)
         self.assertDictEqual(r, Expected.FALLBACK_DEFAULT)
 
 

@@ -3,6 +3,9 @@
 from echokit.models import _ASKObject, ASKResponse
 
 __handler_funcs = {}
+_LAUNCH_REQUEST = 'LaunchRequest'
+_SESSION_ENDED_REQUEST = 'SessionEndedRequest'
+_INTENT_REQUEST = 'IntentRequest'
 
 
 # noinspection PyProtectedMember
@@ -29,11 +32,6 @@ def handler(event, context):
         return response_dict
 
 
-_LAUNCH_REQUEST = 'LaunchRequest'
-_SESSION_ENDED_REQUEST = 'SessionEndedRequest'
-_INTENT_REQUEST = 'IntentRequest'
-
-
 def __get_handler(request):
     """Gets the handler function for a request type/intent name"""
     if request.type == _INTENT_REQUEST:
@@ -45,6 +43,8 @@ def __get_handler(request):
         func = __handler_funcs.get('fallback', __fallback_default)
     return func
 
+
+# Decorators
 
 def on_session_launch(func):
     """LaunchRequest decorator"""
@@ -64,14 +64,20 @@ def on_intent(intent_name):
 
 
 def slot(name, dest=None):
+    """Slot wrapper
+    
+    :param name: Slot name. Will be passed to the handler as a keyword 
+        argument unless specified in dest
+    :param dest: Pass the slot value as a keyword parameter matching this name
+    :return: 
+    """
     def slot_checker(func):
         def handler_func(request_wrapper):
             s = request_wrapper.request.intent.slots[name]
-            # if s.value not in values:
-            #     raise ValueError(f"Unexpected value for '{name}'. "
-            #                      f"Received: '{s.value}'. "
-            #                      f"Expected: {values}")
-            return func(request_wrapper, s.value)
+            kw = s.name
+            if dest:
+                kw = dest
+            return func(request_wrapper, kw=s.value)
         return handler_func
     return slot_checker
 
@@ -82,6 +88,7 @@ def fallback(func):
 
 
 def __fallback_default(request_wrapper):
+    """Default @echokit.fallback handler if one isn't otherwise specified"""
     if request_wrapper.request.type == _INTENT_REQUEST:
         print(f"WARNING: Unhandled intent: "
               f"{request_wrapper.request.intent.name}")

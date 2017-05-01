@@ -44,7 +44,6 @@ class ASKResponse(_ASKObject):
                  speech=None, ssml=None, should_end_session=None,
                  reprompt=None):
         """
-        
         :param response: ``_Response`` object
         :param session_attributes: dict
         :param version: 
