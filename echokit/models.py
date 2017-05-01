@@ -15,7 +15,6 @@ class _ASKObject(dict):
         d = dict(self)
         for k, v in dict(d).items():
             if isinstance(v, _ASKObject):
-                print(type(v))
                 d[k] = v._dict()
             elif v is None:
                 del d[k]

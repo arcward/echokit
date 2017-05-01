@@ -74,10 +74,10 @@ def slot(name, dest=None):
     def slot_checker(func):
         def handler_func(request_wrapper):
             s = request_wrapper.request.intent.slots[name]
-            kw = s.name
+            kw = {s.name: s.value}
             if dest:
-                kw = dest
-            return func(request_wrapper, kw=s.value)
+                kw = {dest: s.value}
+            return func(request_wrapper, **kw)
         return handler_func
     return slot_checker
 
