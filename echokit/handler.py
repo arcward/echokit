@@ -63,7 +63,7 @@ def on_intent(intent_name):
     return func_wrapper
 
 
-def slot(name):
+def slot(name, dest=None):
     def slot_checker(func):
         def handler_func(request_wrapper):
             s = request_wrapper.request.intent.slots[name]

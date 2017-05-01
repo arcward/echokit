@@ -36,7 +36,7 @@ def ssml_intent(request_wrapper):
 
 
 @echokit.on_intent('OrderIntent')
-@echokit.slot(name='MenuItem')
+@echokit.slot('MenuItem')
 def order_intent(request_wrapper, menu_item):
     print(menu_item)
     request = request_wrapper.request
