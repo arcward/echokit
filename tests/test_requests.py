@@ -11,11 +11,6 @@ echokit.verify_application_id = False
 def session_started(request_wrapper):
     return echokit.ask('Welcome to Order Maker! WATCHU WANT?')
 
-<<<<<<< HEAD
-    def test_end_session(self):
-        self.assertIsNone(echokit.handler(end_session, mock_context))
-=======
->>>>>>> new_api
 
 # Handles: SessionEndedRequest
 @echokit.on_session_ended
