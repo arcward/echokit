@@ -28,9 +28,9 @@ Setup/verification
     :annotation: = True
 
     If **True**, will verify the application ID in each request against
-    :py:data:`echokit.application_id`, logging an error and raising an
-    :py:exc:`Exception` upon mismatch. If **False**, will ignore the ID and
-    continue as normal.
+    :py:data:`echokit.application_id`, logging an error and raising a
+    :py:exc:`ValueError` exception upon mismatch. If **False**, will ignore
+    the ID and continue as normal.
 
     :type: :py:class:`bool`
 
@@ -39,13 +39,87 @@ Setup/verification
     Handles incoming Lambda requests and routes them to the appropriate
     function based on the
     :py:func:`@echokit.on_session_launch <echokit.on_session_launch>`,
-    :py:func:`@echokit.on_session_end <echokit.on_session_end>`,
+    :py:func:`@echokit.on_session_ended <echokit.on_session_end>`,
     :py:func:`@echokit.on_intent() <echokit.on_intent>` and
     :py:func:`@echokit.fallback <echokit.fallback>` decorators.
 
     Assign ``handler == echokit.handler`` in your main module and set
     ``[your_module].handler`` as the handler in your Lambda function's
     configuration.
+
+Responding
+^^^^^^^^^^
+
+.. py:function:: ask(speech, reprompt=None, ssml=False, session_attributes=None)
+
+    Ask the user a question. By default, *shouldEndSession* is *False*
+
+    :param str speech: *OutputSpeech* text for response
+    :param str reprompt: *OutputSpeech* text to reprompt the user
+    :param bool ssml: *True* if speech text is in SSML format
+        (default: *False*)
+    :param dict session_attributes: Session attributes to set
+
+.. py:function:: tell(speech, ssml=False)
+
+    Tell the user something. By default, *shouldEndSession* is *True*.
+    Additions can be made via the :py:class:`ASKResponse` methods,
+    such as adding a card like
+    ``echokit.tell('Hi').simple_card('Hello!', 'How are you?')``
+
+    :param str speech: *OutputSpeech* text for response
+    :param bool ssml: *True* if speech text is in SSML format
+        (default: *False*)
+
+.. py:class:: ASKResponse()
+
+    Base class for responses. :py:func:`echokit.ask()` and
+    :py:func:`echokit.tell()` are convenience methods which generate this
+    class.
+
+    .. py:method:: should_end_session(end_session)
+
+        :param bool end_session: *True* or *False* to end the session
+
+    .. py:method:: simple_card(title=None, content=None)
+
+        Attaches a *Simple* type card to your response
+
+    .. py:method:: standard_card(title=None, text=None, small_image_url=None, large_image_url=None)
+
+        Attaches a *Standard* type card to your response
+
+        :param str title:
+        :param str text:
+        :param str small_image_url:
+        :param str large_image_url:
+
+    .. py:method:: link_account_card(content=None)
+
+        Attaches a *LinkAccount* type card to your response
+
+    .. py:method:: session_attributes(session_attributes)
+
+        :param dict session_attributes: Session attributes to set in your
+            response
+
+    .. py:method:: reprompt(speech, ssml=False)
+
+        Attaches a reprompt to your response
+
+        :param str speech: Speech text
+        :param bool ssml: Set to *True* if using SSML
+
+    .. py:method:: speech(text, ssml=False)
+
+        Attaches *OutputSpeech* to your response
+
+        :param str text: Speech text
+        :param bool ssml: *True* if speech text is in SSML format
+
+
+
+
 
 Example
 ~~~~~~~
@@ -62,7 +136,7 @@ Decorators
 
     Designates handler function for :py:class:`LaunchRequest <request_models.LaunchRequest>`
 
-.. py:decoratormethod:: on_session_end
+.. py:decoratormethod:: on_session_ended
 
     Designates handler function for a :py:class:`SessionEndedRequest <request_models.SessionEndedRequest>`
 
@@ -72,6 +146,18 @@ Decorators
     *intent_name*
 
     :param str intent_name: Name of the intent to handle (:py:attr:`Intent.name <request_models.Intent.name>`)
+
+.. py:decoratormethod:: slot(name, dest=None)
+
+    Causes the value of the slot to be passed to your function as keyword param
+    *name*, or one set in *dest* (ex: if an IntentRequest sends you a slot
+    named '*manufacturer*' in your interaction model, set
+    ``@slot(name='manufacturer')`` and its value will be passed).
+
+    :param str name: Name of the slot received in the request (by default,
+        will be passed to your function as a keyword argument)
+    :param str dest: (Default: *None*) Set to change the keyword argument
+        passed to your function
 
 .. py:decoratormethod:: fallback
 
@@ -91,324 +177,23 @@ Decorators
 
 Usage
 ~~~~~
-Handler functions should accept two arguments:
+Handler functions should accept a single argument, which will be a wrapper
+for the request/session/context/version received. If you use the *@slot*
+decorator, it should accept the slot's name or the value set for *dest*:
 
- - The first, for a request object (:class:`LaunchRequest`, :class:`SessionEndedRequest` or :class:`IntentRequest`)
- - The second, for a :class:`Session` object
-
-They should also return a :class:`Response` object.
-For example:
 
 .. code-block:: python
 
     @echokit.on_session_launch
-    def session_started(launch_request, session):
-        speech = "You just started a new session!"
-        return Response(output_speech=PlainTextOutputSpeech(speech)
-
-    @echokit.on_intent('SomeIntent')
-    def some_intent(request, session):
-        speech = f"You invoked {request.intent.name}"
-        return Response(output_speech=PlainTextOutputSpeech(speech))
-
-
-Models
-------
-RequestWrapper
-^^^^^^^^^^^^^^
-.. py:module:: echokit.request_models
-.. py:class:: RequestWrapper
-
-    Wrapper for an incoming request's parameters and body.
-
-    :raises Exception: If :py:data:`echokit.verify_application_id`
-        is **True** and  :py:data:`session.application.application_id \
-        <Application.application_id>` doesn't match
-        :py:data:`echokit.application_id`
-
-    .. py:attribute:: request
-
-        :type: :py:class:`LaunchRequest`, :py:class:`IntentRequest`,
-            or :py:class:`SessionEndedRequest`
-
-    .. py:attribute:: session
-
-        :type: :py:class:`Session`
-
-    .. py:attribute:: context
-
-        :type: :py:class:`Context`
-
-    .. py:attribute:: version
-        :annotation: = '1.0'
-
-Session
-^^^^^^^
-.. py:class:: Session
-
-    .. py:attribute:: session_id
-    .. py:attribute:: new
-    .. py:attribute:: attributes
-
-        :type: dict(str, object)
-    .. py:attribute:: application
-
-        :type: :py:class:`Application`
-    .. py:attribute:: user
-
-        :type: :py:class:`User`
-
-Context
-^^^^^^^
-.. py:class:: Context
-
-    .. py:attribute:: system
-
-        :type: :py:class:`System`
-
-    .. py:attribute:: audio_player
-
-        :type: :py:class:`AudioPlayer`
-
-System
-^^^^^^
-.. py:class:: System
-
-    .. py:attribute:: api_endpoint
-
-    .. py:attribute:: application
-
-        :type: :py:class:`Application`
-    .. py:attribute:: user
-
-        :type: :py:class:`User`
-    .. py:attribute:: device
-
-        .. py:class:: Device
-
-            .. py:attribute:: device_id
-            .. py:attribute:: supported_interfaces
-
-Application
-^^^^^^^^^^^
-.. py:class:: Application
-
-    .. py:attribute:: application_id
-
-User
-^^^^
-.. py:class:: User
-
-    .. py:attribute:: user_id
-    .. py:attribute:: access_token
-    .. py:attribute:: permissions
-
-AudioPlayer
-^^^^^^^^^^^
-.. py:class:: AudioPlayer
-
-    **NOTE**: The AudioPlayer reference is not implemented, this is just
-    a placeholder.
-
-    For more info, see: `AudioPlayer Interface Reference`_
-
-    .. py:attribute:: token
-    .. py:attribute:: offset_in_milliseconds
-    .. py:attribute:: player_activity
-
-Standard Types
---------------
-For more info, see: `Standard Request Types Reference`_
-
-LaunchRequest
-^^^^^^^^^^^^^
-.. py:class:: LaunchRequest
-
-    Register a handler for this type with the
-    :py:func:`@echokit.on_session_launch <echokit.on_session_launch>`
-    decorator.
-
-    .. py:attribute:: request_id
-    .. py:attribute:: timestamp
-    .. py:attribute:: locale
-
-SessionEndedRequest
-^^^^^^^^^^^^^^^^^^^
-.. py:class:: SessionEndedRequest
-
-    Register a handler for this type with the
-    :py:func:`@echokit.on_session_end <echokit.on_session_end>` decorator.
-
-    .. py:attribute:: request_id
-    .. py:attribute:: timestamp
-    .. py:attribute:: locale
-    .. py:attribute:: reason
-    .. py:attribute:: error
-
-        :type: :py:class:`SessionEndedRequest.Error`
-
-    .. py:class:: Error
-
-        .. py:attribute:: type
-        .. py:attribute:: message
-
-IntentRequest
-^^^^^^^^^^^^^
-.. py:class:: IntentRequest
-
-    Register handlers for intent requests with the
-    :py:func:`@echokit.on_intent() <echokit.on_intent>` decorator.
-
-    **Unrecognized intents**:
-        Use the :py:func:`@echokit.fallback <echokit.fallback>` decorator
-        to register a function to handle any request received where
-        :py:data:`IntentRequest.intent.name <Intent.name>` doesn't match
-        anything handled by
-        :py:func:`@echokit.on_intent() <echokit.on_intent>`.
-
-        If :py:func:`@echokit.fallback <echokit.fallback>` isn't used,
-        the default handler for this is :py:func:`echokit.fallback_default`
-
-    .. py:attribute:: request_id
-    .. py:attribute:: timestamp
-    .. py:attribute:: locale
-    .. py:attribute:: dialog_state
-    .. py:attribute:: intent
-
-        :type: :py:class:`Intent`
-
-Intent
-------
-.. py:class:: Intent
-
-    .. py:attribute:: name
-    .. py:attribute:: confirmation_status
-    .. py:attribute:: slots
-
-        :type: list[:py:class:`Slot`]
-
-.. py:class:: Slot
-
-    .. py:attribute:: name
-    .. py:attribute:: value
-    .. py:attribute:: confirmation_status
-
-
-Responses
-=========
-For more info, see: `JSON Interface Reference for Custom Skills`_
-
-Response
---------
-.. py:module:: echokit
-.. py:class:: Response(output_speech=None, card=None, reprompt=None, \
-                       should_end_session=None, session_attributes=None, \
-                       directives=None, version='1.0')
-
-    .. py:attribute:: output_speech
-        :annotation: = None
-
-        :type: :py:class:`PlainTextOutputSpeech`, :py:class:`SSMLOutputSpeech`
-
-    .. py:attribute:: card
-        :annotation: = None
-
-        :type: :py:class:`SimpleCard`, :py:class:`StandardCard`, :py:class:`LinkAccountCard`
-
-    .. py:attribute:: reprompt
-        :annotation: = None
-
-        :type: :py:class:`Reprompt`
-
-    .. py:attribute:: should_end_session
-        :annotation: = None
-
-        :type: :py:class:`bool`
-
-    .. py:attribute:: session_attributes
-        :annotation: = None
-
-        :type: :py:class:`dict[str, object]`
-
-    .. py:attribute:: directives
-        :annotation: = None
-
-        :type: :py:class:`list`
-
-    .. py:attribute:: version
-        :annotation: = '1.0'
-
-Output Speech
--------------
-PlainText
-^^^^^^^^^
-.. py:class:: PlainTextOutputSpeech(text)
-
-    :param str text: Output speech text
-
-    .. py:attribute:: type
-            :annotation: = 'PlainText'
-
-
-SSML
-^^^^
-.. py:class:: SSMLOutputSpeech(ssml)
-
-    For more info, see: SSML_
-
-    :param str ssml: SSML markup
-
-    .. py:attribute:: type
-        :annotation: = 'SSML'
-
-Reprompt
---------
-.. py:class:: Reprompt(output_speech)
-
-    :param output_speech: Speech to return if a reprompt is needed
-    :type output_speech: :py:class:`PlainTextOutputSpeech`,
-        :py:class:`SSMLOutputSpeech`
-
-
-Cards
------
-
-.. py:class:: SimpleCard(title=None, content=None)
-
-    .. py:attribute:: type
-        :annotation: = 'Simple'
-
-    .. py:attribute:: title
-        :annotation: = None
-
-    .. py:attribute:: content
-        :annotation: = None
-
-.. py:class:: StandardCard(title=None, text=None, small_image_url=None, \
-                           large_image_url=None)
-
-    .. py:attribute:: type
-        :annotation: = 'Standard'
-
-    .. py:attribute:: title
-        :annotation: = None
-
-    .. py:attribute:: text
-        :annotation: = None
-
-    .. py:attribute:: small_image_url
-        :annotation: = None
-
-    .. py:attribute:: large_image_url
-        :annotation: = None
-
-.. py:class:: LinkAccountCard(content=None)
-
-    .. py:attribute:: type
-        :annotation: = 'LinkAccount'
-
-    .. py:attribute:: content
-        :annotation: = None
+    def session_started(request_wrapper):
+        return echokit.ask('You just started a new session!')
+
+    @echokit.on_intent('OrderIntent')
+    @echokit.slot('MenuItem', dest='menu_item')
+    def order_intent(request_wrapper, menu_item):
+        request = request_wrapper.request
+        return echokit.tell(f"You just ordered {menu_item}")\
+            .simple_card(title="Previous order", content=menu_item)
 
 
 Indices and tables

@@ -8,9 +8,7 @@ Why?
 ====
 I felt other solutions were either too clunky, or not quite 
 focused on deployment in AWS Lambda (execution time is money!). 
-That's why echokit has **no dependencies** and includes a 
-command-line tool *echodist* to package itself with your 
-project for easier deployment to Lambda!
+That's why echokit has **no dependencies**!
 
 Installation
 ============
@@ -46,10 +44,9 @@ http://echokit.readthedocs.io/en/latest/
 ===============
 Getting Started
 ===============
-When you configure your Lambda function, you need to specify a handler_. And
+When you configure your Lambda function, you need to specify a handler. And
 when you configure your skill in the `Alexa dev portal`_, you'll be provided
-an application ID for your skill. To provide these, the top of your module
-should look like this:
+an application ID for your skill. Set these at the top of your module:
 
 .. code-block:: python
 
@@ -73,22 +70,23 @@ Example
     handler = echokit.handler
     echokit.application_id = "my_app_id"
 
-    @echokit.on_session_started
-    def start_session(request, session):
-        output_speech = PlainTextOutputSpeech("Hello!")
-        return Response(output_speech=output_speech)
+    @echokit.on_session_launch
+    def session_started(request_wrapper):
+        return echokit.ask('Hello!')
 
-    @echokit.on_session_end
-    def end_session(request, session):
-        # Can't return a response to SessionEndedRequest
-        print(request.intent.reason)
+    @echokit.on_session_ended
+    def session_ended(request_wrapper):
+        # Print statement will log the reason to CloudWatch
+        print(request_wrapper.request.reason)
 
     @echokit.on_intent('OrderIntent')
-    def send_order(request, session):
+    @echokit.slot('MenuItem', dest='menu_item')
+    def order_intent(request_wrapper, menu_item):
+        print(menu_item)
+        request = request_wrapper.request
         menu_item = request.intent.slots['MenuItem'].value
-        output_speech = PlainTextOutputSpeech(f"You ordered a {menu_item}")
-        return Response(output_speech=output_speech,
-                        session_attributes={'last_ordered': menu_item})
+        return echokit.tell(f"You just ordered {menu_item}")\
+            .simple_card(title="Previous order", content=menu_item)
 
 Creating a Lambda deployment package
 ====================================
@@ -96,7 +94,7 @@ For reference, see the `official docs`_.
 
 echodist
 --------
-``echodist`` is a script included to automatically create ZIP deployment
+``echodist`` is a script included to help create ZIP deployment
 packages. If you installed via *setup.py*, you can run it from the command
 line (try ``echodist --help``).
 
