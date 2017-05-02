@@ -12,6 +12,6 @@ setup(
     url='https://github.com/arcward/echokit',
     packages=['echokit'],
     entry_points={
-        'console_scripts': ['echodist=echokit.cli:echodist']
+        'console_scripts': ['echodist=echokit.echodist:echodist']
     }
 )

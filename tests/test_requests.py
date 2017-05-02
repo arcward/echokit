@@ -45,7 +45,6 @@ def ssml_intent(request_wrapper):
 def order_intent(request_wrapper, menu_item):
     print(menu_item)
     request = request_wrapper.request
-    menu_item = request.intent.slots['MenuItem'].value
     return echokit.tell(f"You just ordered {menu_item}")\
         .simple_card(title="Previous order", content=menu_item)
 

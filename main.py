@@ -54,11 +54,14 @@ def ssml_intent(request_wrapper):
 # This would return output speech like: 'You asked me to jump'
 # The session variable would be returned on the next invocation
 @echokit.on_intent('OrderIntent')
-def order_intent(request_wrapper):
+@echokit.slot('MenuItem', dest='menu_item')
+def order_intent(request_wrapper, menu_item):
+    print(menu_item)
     request = request_wrapper.request
     menu_item = request.intent.slots['MenuItem'].value
     return echokit.tell(f"You just ordered {menu_item}")\
         .simple_card(title="Previous order", content=menu_item)
+
 
 
 # Handles: IntentRequest (unimplemented intent)
