@@ -34,6 +34,13 @@ Sample
 A sample skill using echokit can be found at this repo:
 https://github.com/arcward/echokit-example
 
+=============
+Documentation
+=============
+More comprehensive documentation can be found on ReadTheDocs_:
+
+http://echokit.readthedocs.io/en/latest/
+
 ===============
 Getting Started
 ===============
