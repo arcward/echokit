@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='echokit',
-    version='0.3.0',
+    version='0.3.1',
     author='Edward Wells',
     author_email='git@edward.sh',
     description="Alexa Skills Kit SDK for Python 3.6",

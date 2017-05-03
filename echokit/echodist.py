@@ -32,6 +32,21 @@ def copy_dir(project_path):
     return os.path.join(os.path.abspath(os.getcwd()), tmp_path)
 
 
+def filename_prompt(file_name):
+    rename = input(f"File {file_name} already exists. Rename? [Y/n] ")
+    rename = rename.strip()
+    rename = rename.upper()
+    if rename == 'Y':
+        new_filename = input("Enter new filename: ")
+    else:
+        exit()
+    path = os.path.join(os.path.abspath(os.getcwd()), new_filename)
+    if os.path.exists(path):
+        filename_prompt(new_filename)
+    else:
+        return path
+
+
 def echodist():
     description = "Creates a deployment package for AWS Lambda"
     epilog = ("Specify the top level of your project with --dir.\nFor "
@@ -55,7 +70,7 @@ def echodist():
     file_path = os.path.join(os.path.abspath(os.getcwd()), file_name)
     print(f"Creating deployment package in:\n\t{file_path}")
     if os.path.exists(file_path):
-        raise FileExistsError(file_path)
+        file_path = filename_prompt(file_name)
 
     # Copy to tmp directory, cd in and create the archive
     tmp_project_dir = copy_dir(out_dir)
