@@ -1,4 +1,7 @@
 from unittest import TestCase
+
+import echokit.handlers
+import echokit.responses
 from tests.mock_requests import *
 import echokit
 
@@ -7,45 +10,45 @@ echokit.verify_application_id = False
 
 
 # Handles: LaunchRequest
-@echokit.on_session_launch
+@echokit.handlers.on_session_launch
 def session_started(request_wrapper):
-    return echokit.ask('Welcome to Order Maker! WATCHU WANT?')
+    return echokit.responses.ask('Welcome to Order Maker! WATCHU WANT?')
 
 
 # Handles: SessionEndedRequest
-@echokit.on_session_ended
+@echokit.handlers.on_session_ended
 def session_ended(request_wrapper):
     print(request_wrapper.request.reason)
 
 
 # Handles: IntentRequest
-@echokit.on_intent('HoursIntent')
+@echokit.handlers.on_intent('HoursIntent')
 def hours_intent(request_wrapper):
-    return echokit.tell("We're open 5AM to 8PM!") \
+    return echokit.responses.tell("We're open 5AM to 8PM!") \
         .simple_card(title="Hours", content="5AM-8PM")
 
 
-@echokit.on_intent('SanicIntent')
+@echokit.handlers.on_intent('SanicIntent')
 def sanic_intent(request_wrapper):
-    return echokit.tell("Gotta go fast")\
+    return echokit.responses.tell("Gotta go fast")\
         .standard_card(title="Sanic", text="Gotta go fast",
                        large_image_url="https://i.imgur.com/PytSZCG.png")
 
 
-@echokit.on_intent('SsmlIntent')
+@echokit.handlers.on_intent('SsmlIntent')
 def ssml_intent(request_wrapper):
     ssml = ("<speak>Onomatopoeia: "
             "<say-as interpret-as=\"spell-out\">onomatopoeia</say-as>."
             "</speak>")
-    return echokit.tell(speech=ssml, ssml=True)
+    return echokit.responses.tell(speech=ssml, ssml=True)
 
 
-@echokit.on_intent('OrderIntent')
-@echokit.slot('MenuItem', dest='menu_item')
+@echokit.handlers.on_intent('OrderIntent')
+@echokit.handlers.slot('MenuItem', dest='menu_item')
 def order_intent(request_wrapper, menu_item):
     print(menu_item)
     request = request_wrapper.request
-    return echokit.tell(f"You just ordered {menu_item}")\
+    return echokit.responses.tell(f"You just ordered {menu_item}")\
         .simple_card(title="Previous order", content=menu_item)
 
 
@@ -65,30 +68,30 @@ class TestRequests(TestCase):
             'MenuItem', 'spaghetti'), new=False)
 
     def test_start_session(self):
-        r = echokit.handler(LAUNCH_REQUEST, MockContext)
+        r = echokit.handlers.handler(LAUNCH_REQUEST, MockContext)
         self.assertDictEqual(r, Expected.SESSION_STARTED)
 
     def test_end_session(self):
-        r = echokit.handler(SESSION_ENDED_REQUEST, MockContext)
+        r = echokit.handlers.handler(SESSION_ENDED_REQUEST, MockContext)
         self.assertIsNone(r)
 
     def test_order_intent(self):
-        r = echokit.handler(self.order_intent, MockContext)
+        r = echokit.handlers.handler(self.order_intent, MockContext)
         self.assertDictEqual(r, Expected.ORDER_INTENT)
 
     def test_ssml_intent(self):
-        r = echokit.handler(self.ssml_intent, MockContext)
+        r = echokit.handlers.handler(self.ssml_intent, MockContext)
         self.assertDictEqual(r, Expected.SSML_INTENT)
 
     def test_unknown_intent(self):
-        r = echokit.handler(self.unknown_intent, MockContext)
+        r = echokit.handlers.handler(self.unknown_intent, MockContext)
         self.assertDictEqual(r, Expected.FALLBACK_DEFAULT)
 
     def test_incorrect_app_id(self):
         echokit.application_id = 'asdf'
         echokit.verify_application_id = True
-        self.assertRaises(ValueError, echokit.handler, event=LAUNCH_REQUEST,
-                          context=MockContext)
+        self.assertRaises(ValueError, echokit.handlers.handler,
+                          event=LAUNCH_REQUEST, context=MockContext)
         echokit.verify_application_id = False
 
 

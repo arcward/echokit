@@ -6,7 +6,7 @@ import shutil
 import zipfile
 
 
-def zipdir(path, ziph):
+def _zipdir(path, ziph):
     # Modified from example at:
     # http://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
     # Modified to use relative paths instead of recreating the entire
@@ -22,7 +22,7 @@ def zipdir(path, ziph):
             ziph.write(output_path)
 
 
-def copy_dir(project_path):
+def _copy_dir(project_path):
     """Copies given path to tmp-{project_path}"""
     tmp_path = f"tmp-{os.path.basename(os.path.normpath(project_path))}"
     print(f"Copying project directory to temporary path: {tmp_path}")
@@ -32,7 +32,8 @@ def copy_dir(project_path):
     return os.path.join(os.path.abspath(os.getcwd()), tmp_path)
 
 
-def filename_prompt(file_name):
+def _filename_prompt(file_name):
+    """Prompt user to rename output file if it already exists"""
     rename = input(f"File {file_name} already exists. Rename? [Y/n] ")
     rename = rename.strip()
     rename = rename.upper()
@@ -42,7 +43,7 @@ def filename_prompt(file_name):
         exit()
     path = os.path.join(os.path.abspath(os.getcwd()), new_filename)
     if os.path.exists(path):
-        filename_prompt(new_filename)
+        _filename_prompt(new_filename)
     else:
         return path
 
@@ -70,14 +71,14 @@ def echodist():
     file_path = os.path.join(os.path.abspath(os.getcwd()), file_name)
     print(f"Creating deployment package in:\n\t{file_path}")
     if os.path.exists(file_path):
-        file_path = filename_prompt(file_name)
+        file_path = _filename_prompt(file_name)
 
     # Copy to tmp directory, cd in and create the archive
-    tmp_project_dir = copy_dir(out_dir)
+    tmp_project_dir = _copy_dir(out_dir)
     output_file_path = os.path.join(os.path.abspath(os.getcwd()), file_path)
 
     dist_zip = zipfile.ZipFile(output_file_path, 'w', zipfile.ZIP_DEFLATED)
-    zipdir(tmp_project_dir, dist_zip)
+    _zipdir(tmp_project_dir, dist_zip)
     dist_zip.close()
 
     print("Deployment package created")
