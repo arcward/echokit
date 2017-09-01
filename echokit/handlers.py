@@ -67,7 +67,7 @@ def handler(event, context):
           f"Event received: {event}")
     ask_request = _ASKObject(**event)
     if (echokit.verify_application_id and
-            ask_request.request.requestId != echokit.application_id):
+            ask_request.session.application.applicationId != echokit.application_id):
         raise ValueError(f"App ID expected: '{echokit.application_id}' "
                          f"App ID received: {ask_request.request.requestId}")
     handler_func = __get_handler(ask_request.request)
