@@ -1,0 +1,2 @@
+class ASKException(Exception):
+    pass
