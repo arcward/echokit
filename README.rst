@@ -50,6 +50,8 @@ define ``sample.handler`` as the handler in your Lambda function.
 Handling Requests
 -----------------
 
+Responses to requests are created via :class:`echokit.response.Response`
+
 There are three decorators to handle each basic request type, as well as
 one to handle slots:
 

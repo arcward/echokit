@@ -1,3 +1,4 @@
+"""Main module to handle skills"""
 import logging
 from .request import ASKRequest
 from .response import Response
@@ -29,9 +30,9 @@ class EchoKit:
     def response(self, speech, type='PlainText'):
         """Create a response for the user
 
-        :param speech: Outpuf speech
-        :param type: Use _PlainText_ (default) if *speech* is
-            formatted as plain text. Use _SSML_ if *speech*
+        :param speech: Output speech
+        :param type: Use *PlainText* (default) if *speech* is
+            formatted as plain text. Use *SSML* if *speech*
             is a string of SSML markup.
         :return: :class:`Response`
         """
@@ -42,12 +43,19 @@ class EchoKit:
         )
 
     def launch(self, func):
+        """Decorator to handle *LaunchRequest*"""
         self._handler_functions['LaunchRequest'] = func
 
     def session_ended(self, func):
+        """Decorator to handle *SessionEndedRequest*"""
         self._handler_functions['SessionEndedRequest'] = func
 
     def intent(self, name):
+        """Decorator to handle *IntentRequest*
+
+        :param name: Name of the intent to handle
+        :return:
+        """
         def intent_wrapper(func):
             self._handler_functions[name] = func
         return intent_wrapper

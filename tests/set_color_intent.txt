@@ -16,8 +16,8 @@
     "intent": {
       "name": "MyColorIsIntent",
       "slots": {
-        "Color": {
-          "name": "Color",
+        "color": {
+          "name": "color",
           "value": "red"
         }
       }
