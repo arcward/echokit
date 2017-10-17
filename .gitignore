@@ -102,5 +102,4 @@ main.py
 main_audio.py
 *.zip
 
-tests/*
-.coverage
+tests/
