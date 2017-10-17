@@ -1,22 +1,15 @@
-##############
-echokit README
-##############
+README: echokit 0.4
+===================
 
 A light(er)weight toolkit to create Alexa skills (Python 3.6)
 
-************
 Installation
-************
+------------
 
 Requirements:
 
 * Python 3.6 or newer
 
-**Using pip**:
-
-.. code-block:: bash
-
-    pip install echokit
 
 **From GitHub**:
 
@@ -26,17 +19,8 @@ Clone/download this repo and run this from the ``echokit/`` directory:
 
     python setup.py install
 
-=============
-Documentation
-=============
-
-More comprehensive documentation can be found on ReadTheDocs_:
-
-http://echokit.readthedocs.io/en/latest/
-
-***************
 Getting Started
-***************
+---------------
 
 Sample skills can be found at https://github.com/arcward/echokit under
 the *samples/* directory.
@@ -44,7 +28,7 @@ the *samples/* directory.
 More comprehensive documentation can be found on ReadTheDocs_
 
 Application ID/Handler
-======================
+----------------------
 
 When you're configuring your skill in the `Alexa developer console`_, you'll
 be given an ID for your skill. This can be specified in EchoKit, as well
@@ -64,7 +48,7 @@ If, for example, your skill's module is ``sample.py``, then you would
 define ``sample.handler`` as the handler in your Lambda function.
 
 Handling Requests
-=================
+-----------------
 
 There are three decorators to handle each basic request type, as well as
 one to handle slots:
@@ -99,9 +83,9 @@ one to handle slots:
 
 
 Creating a ZIP file for upload to AWS Lambda
-============================================
+--------------------------------------------
 
-echozip
+EchoZip
 --------
 ``echozip`` is a script included to help create ZIP deployment
 packages. If you installed via *setup.py*, you can run it from the command
