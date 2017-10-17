@@ -12,6 +12,6 @@ setup(
     url='https://github.com/arcward/echokit',
     packages=['echokit'],
     entry_points={
-        'console_scripts': ['echozip=echokit.echozip:echozip']
+        'console_scripts': ['echozip=echokit.echozip:main']
     }
 )

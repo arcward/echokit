@@ -98,9 +98,8 @@ one to handle slots:
         pass
 
 
-Creating a Lambda deployment package
-====================================
-For reference, see the `official docs`_.
+Creating a ZIP file for upload to AWS Lambda
+============================================
 
 echozip
 --------
@@ -108,17 +107,14 @@ echozip
 packages. If you installed via *setup.py*, you can run it from the command
 line (try ``echozip --help``).
 
-Specify your top-level package directory with ``--dir``. For example, if
-your ``__init__.py`` is located at ``~/somepy/somepy/__init__.py`` you would
-run:
+Specify your top-level package directory. For example, if
+your ``__init__.py`` is located at ``example/__init__.py`` you would
+run ``echozip example``
 
-.. code-block:: bash
-
-    ~ & echozip --dir ~/somepy/somepy
-
-This would create ``somepy.zip`` in your home directory (or whever you
-ran the command). If you unzip it, you can see it includes the entire
-subtree of the directory you specified, as well as an ``echokit/`` directory.
+This would create a ZIP file in your current directory, named like
+*example_{YY-MM-DD-HHMMSS}.zip*. If you extract it again, you'll see that it
+includes the full subtree of the directory you specified, with an
+additional *echokit/* directory at the top level.
 
 Manually
 --------

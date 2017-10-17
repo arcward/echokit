@@ -1,87 +1,79 @@
-"""Command-line utility to create Lambda deployment ZIP files"""
+"""Utility to bundle echokit into a lambda function for deployment as ZIP
+
+Deploying an AWS Lambda function using a ZIP archive requires dependencies
+to be included as well. Specifically, this utility copies the specified
+directory tree into a temporary one, adds an *echokit* directory at the
+top level of that structure, copies the current echokit install into that
+directory, and zips it all up.
+
+So rather than explicitly creating this directory in a project and possibly
+running into conflicts between that and the version installed via *pip*,
+the installed version will always be copied into the final ZIP.
+"""
 import argparse
-import os
-import echokit
-import shutil
 import zipfile
+import echokit
+from os import getcwd, chdir, path, walk
+from shutil import copytree, rmtree
+from datetime import datetime
 
 
-def _zipdir(path, ziph):
-    # Modified from example at:
-    # http://stackoverflow.com/questions/1855095/how-to-create-a-zip-archive-of-a-directory
-    # Modified to use relative paths instead of recreating the entire
-    #  directory structure in the ZIP file. Ex: Zipping /home/me/project
-    #  would create paths like /home/me/project/test.txt
-    # Now this will cause /home/me/project/test.txt to be at the top of
-    # the ZIP directory structure
-    os.chdir(path)
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            rel_path = os.path.relpath(os.path.join(root), os.getcwd())
-            output_path = os.path.join(rel_path, file)
-            ziph.write(output_path)
-
-
-def _copy_dir(project_path):
-    """Copies given path to tmp-{project_path}"""
-    tmp_path = f"tmp-{os.path.basename(os.path.normpath(project_path))}"
-    print(f"Copying project directory to temporary path: {tmp_path}")
-    shutil.copytree(project_path, tmp_path)
-    shutil.copytree(os.path.dirname(echokit.__file__),
-                    os.path.join(tmp_path, 'echokit'))
-    return os.path.join(os.path.abspath(os.getcwd()), tmp_path)
-
-
-def _filename_prompt(file_name):
-    """Prompt user to rename output file if it already exists"""
-    rename = input(f"File {file_name} already exists. Rename? [Y/n] ")
-    rename = rename.strip()
-    rename = rename.upper()
-    if rename == 'Y':
-        new_filename = input("Enter new filename: ")
-    else:
-        exit()
-    path = os.path.join(os.path.abspath(os.getcwd()), new_filename)
-    if os.path.exists(path):
-        _filename_prompt(new_filename)
-    else:
-        return path
-
-
-def echodist():
-    description = "Creates a deployment package for AWS Lambda"
-    epilog = ("Specify the top level of your project with --dir.\nFor "
-              "example, if __init__.py is located at  "
-              "/home/me/project/project/__init__.py, you would specify "
-              "/home/me/proj_root/project\nThis will create "
-              "a 'project.zip' file in your current directory.")
-    parser = argparse.ArgumentParser(prog='echodist', description=description,
-                                     epilog=epilog)
-    parser.add_argument('--dir', required=True,
-                        help='Directory containing your project')
+def main():
+    parser = argparse.ArgumentParser(
+        prog="echozip",
+        description="Bundles a specified directory and echokit into a ZIP "
+                    "archive for upload to AWS Lambda.",
+        epilog="Specify the base directory for your project. A ZIP file "
+               "containing the contents of that directory, as well as "
+               "an echokit/ directory at the top level of the archive, will "
+               "be created in the current working directory."
+    )
+    parser.add_argument("directory", help='Directory containing your project')
     args = parser.parse_args()
+    echozip(args.directory)
 
-    out_dir = os.path.abspath(args.dir)
-    if not os.path.exists(out_dir):
-        raise NotADirectoryError(f"Invalid project path: {out_dir}")
-    print(f"Creating Lambda deployment package from:\n\t{out_dir}")
 
-    # If /home/me/project/, then create project.zip in the current working dir
-    file_name = f"{os.path.basename(os.path.normpath(out_dir))}.zip"
-    file_path = os.path.join(os.path.abspath(os.getcwd()), file_name)
-    print(f"Creating deployment package in:\n\t{file_path}")
-    if os.path.exists(file_path):
-        file_path = _filename_prompt(file_name)
+def echozip(directory):
+    """Create ZIP file packaged with echokit
 
-    # Copy to tmp directory, cd in and create the archive
-    tmp_project_dir = _copy_dir(out_dir)
-    output_file_path = os.path.join(os.path.abspath(os.getcwd()), file_path)
+    :param directory: Project/skill directory
+    :return:
+    """
+    if not path.isdir(directory):
+        raise NotADirectoryError(f"Invalid path: {directory}")
+    cwd = getcwd()
+    proj_dir = path.basename(path.abspath(directory))
+    timestamp = datetime.now().strftime("%d-%m-%y-%H%M%S")
+    proj_base = f"{proj_dir}_{timestamp}"
+    zip_dir = path.join(cwd, proj_base)
+    zip_file_path = path.join(cwd, f"{proj_base}.zip")
 
-    dist_zip = zipfile.ZipFile(output_file_path, 'w', zipfile.ZIP_DEFLATED)
-    _zipdir(tmp_project_dir, dist_zip)
-    dist_zip.close()
+    if path.exists(zip_dir):
+        raise IsADirectoryError(f"Directory already exists! {zip_dir}")
+    if path.exists(zip_file_path):
+        raise FileExistsError(f"File exists!: {zip_file_path}")
 
-    print("Deployment package created")
-    print(f"Removing temporary directory:\n\t{tmp_project_dir}")
-    shutil.rmtree(tmp_project_dir)
-    print("Done")
+    # Copy the full project directory tree into the temporary directory
+    print(f"Copying project to temporary directory: {zip_dir}")
+    copytree(directory, zip_dir)
+    copytree(path.dirname(echokit.__file__), path.join(zip_dir, 'echokit'))
+
+    # Create the ZIP archive, cd into the temporary directory, then
+    # recursively add the entire tree to the ZIP
+    print(f"Creating: {zip_file_path}")
+    zip_file = zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED)
+    chdir(zip_dir)
+    for root, dirs, files in walk(zip_dir):
+        for file in files:
+            out_path = path.join(path.relpath(path.join(root), getcwd()), file)
+            print(f"Writing: {out_path}")
+            zip_file.write(out_path)
+    zip_file.close()
+    print(f"Cleaning up, removing temporary directory: {zip_dir}")
+    chdir(cwd)
+    rmtree(zip_dir)
+    print("Done! Created ZIP archive: {zip_file_path}")
+
+
+if __name__ == '__main__':
+    main()
