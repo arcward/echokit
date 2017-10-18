@@ -54,43 +54,44 @@ class Response:
         """Dictionary of session attributes to persist"""
         return self._dict['sessionAttributes']
 
-    def _speech(self, speech, type):
+    # TODO Investigate why setting @staticmethod on ._speech breaks .speech
+    def _speech(self, speech, speech_type):
         """Include speech with the response
 
         :param speech: Speech text
         :type speech: str
-        :param type: *PlainText* or *SSML* (if passing a string with SSML)
+        :param speech_type: *PlainText* or *SSML* (if passing a string with SSML)
         :return:
         """
-        d = {'type': type}
-        if type == 'PlainText':
+        d = {'type': speech_type}
+        if speech_type == 'PlainText':
             d['text'] = speech
-        elif type == 'SSML':
+        elif speech_type == 'SSML':
             d['ssml'] = speech
         else:
             # TODO exception
             raise Exception('')
         return d
 
-    def speech(self, speech, type='PlainText'):
+    def speech(self, speech, speech_type='PlainText'):
         """Sets *outputSpeech* for the response
 
         :param speech: Speech text
-        :param type: *PlainText* or *SSML*
+        :param speech_type: *PlainText* or *SSML*
         :return:
         """
-        self._dict['response']['outputSpeech'] = self._speech(speech, type)
+        self._dict['response']['outputSpeech'] = self._speech(speech, speech_type)
         return self
 
-    def reprompt(self, speech, type='PlainText'):
+    def reprompt(self, speech, speech_type='PlainText'):
         """Include a reprompt in the response
 
         :param speech: Speech text
-        :param type: *PlainText* or *SSML*
+        :param speech_type: *PlainText* or *SSML*
         :return:
         """
         self._dict['response']['reprompt'] = {
-            'outputSpeech': self._speech(speech, type)
+            'outputSpeech': self._speech(speech, speech_type)
         }
         return self
 

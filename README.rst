@@ -1,5 +1,5 @@
-README: echokit 0.4
-===================
+echokit 0.4
+===========
 
 A light(er)weight toolkit to create Alexa skills (Python 3.6)
 

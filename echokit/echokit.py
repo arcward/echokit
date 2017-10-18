@@ -1,4 +1,4 @@
-"""Main module to handle skills"""
+"""Module for :class:`EchoKit`"""
 import logging
 from .request import ASKRequest
 from .response import Response
@@ -6,6 +6,12 @@ from .exc import ASKException
 
 
 class EchoKit:
+    """Main point of interaction when creating your skill
+
+    Provides decorators to handle requests and slots for intents
+
+    When defining a handler in AWS Lambda, specify :func:`handler`
+    """
     def __init__(self, app_id, verify_app_id=True):
         """
 
@@ -14,18 +20,22 @@ class EchoKit:
             incoming request will be compared against
             :attr:`EchoKit.app_id`, raising :exc:`ASKException` for
             any mismatched IDs. If *False*, incoming application IDs
-            are ignored/
+            are ignored
+        :type verify_app_id: bool
         """
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.INFO)
         #: The application ID for your skill
         self.app_id = app_id
+        #: *True* to check requests against :attr:`EchoKit.app_id`
         self.verify_app_id = verify_app_id
         self._handler_functions = {}
+        # Don't set session attributes here. These are set by incoming
+        # requests only, and are applied to responses before any can be set
+        self._session_attributes = {}
         if not verify_app_id:
             self.log.warning("App ID verification disabled, this skill will "
                              "attempt to respond to all incoming requests")
-        self.session_attributes = {}
 
     def response(self, speech, type='PlainText'):
         """Create a response for the user
@@ -34,12 +44,12 @@ class EchoKit:
         :param type: Use *PlainText* (default) if *speech* is
             formatted as plain text. Use *SSML* if *speech*
             is a string of SSML markup.
-        :return: :class:`Response`
+        :return: :class:`echokit.response.Response`
         """
         return Response(
             speech=speech,
             speech_type=type,
-            session_attributes=self.session_attributes
+            session_attributes=self._session_attributes
         )
 
     def launch(self, func):
@@ -60,7 +70,8 @@ class EchoKit:
             self._handler_functions[name] = func
         return intent_wrapper
 
-    def slot(self, *args):
+    @staticmethod
+    def slot(*args):
         """Decorator to signal the presence of slots
 
         SLot names are case-sensitive, and will be passed into the
@@ -117,10 +128,10 @@ class EchoKit:
         request_handler = self._handler_functions[type_]
         # Retain any incoming session attributes
         if session.attributes:
-            self.session_attributes = session.attributes._dict()
+            self._session_attributes = session.attributes._dict()
         else:
-            self.session_attributes = {}
-            session.attributes = self.session_attributes
+            self._session_attributes = {}
+            session.attributes = self._session_attributes
         response = request_handler(request, session)._dict
         self.log.info({'response': response})
         return response
