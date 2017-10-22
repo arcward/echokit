@@ -4,6 +4,8 @@ https://github.com/alexa/skill-samples-java
 """
 from echokit import EchoKit
 
+# When configuring the Lambda function, the handler here would be
+# defined as `session.handler`
 app = EchoKit("my_app_id", verify_app_id=False)
 handler = app.handler
 
