@@ -101,5 +101,3 @@ main_test.py
 main.py
 main_audio.py
 *.zip
-
-tests/

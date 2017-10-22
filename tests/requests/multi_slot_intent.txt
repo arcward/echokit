@@ -1,0 +1,49 @@
+{
+  "session": {
+    "new": true,
+    "sessionId": "",
+    "application": {
+      "applicationId": ""
+    },
+    "attributes": {},
+    "user": {
+      "userId": ""
+    }
+  },
+  "request": {
+    "type": "IntentRequest",
+    "requestId": "",
+    "intent": {
+      "name": "AnimalColorIntent",
+      "slots": {
+        "SecondColor": {
+          "name": "SecondColor",
+          "value": "purple"
+        },
+        "FirstColor": {
+          "name": "FirstColor",
+          "value": "red"
+        }
+      }
+    },
+    "locale": "en-US",
+    "timestamp": "2017-10-08T23:59:00Z"
+  },
+  "context": {
+    "AudioPlayer": {
+      "playerActivity": "IDLE"
+    },
+    "System": {
+      "application": {
+        "applicationId": ""
+      },
+      "user": {
+        "userId": ""
+      },
+      "device": {
+        "supportedInterfaces": {}
+      }
+    }
+  },
+  "version": "1.0"
+}
