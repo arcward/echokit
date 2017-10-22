@@ -60,7 +60,8 @@ class Response:
 
         :param speech: Speech text
         :type speech: str
-        :param speech_type: *PlainText* or *SSML* (if passing a string with SSML)
+        :param speech_type: *PlainText* or *SSML* (if passing a
+            string with SSML)
         :return:
         """
         d = {'type': speech_type}

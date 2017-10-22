@@ -37,18 +37,18 @@ class EchoKit:
             self.log.warning("App ID verification disabled, this skill will "
                              "attempt to respond to all incoming requests")
 
-    def response(self, speech, type='PlainText'):
+    def response(self, speech, speech_type='PlainText'):
         """Create a response for the user
 
         :param speech: Output speech
-        :param type: Use *PlainText* (default) if *speech* is
+        :param speech_type: Use *PlainText* (default) if *speech* is
             formatted as plain text. Use *SSML* if *speech*
             is a string of SSML markup.
         :return: :class:`echokit.response.Response`
         """
         return Response(
             speech=speech,
-            speech_type=type,
+            speech_type=speech_type,
             session_attributes=self._session_attributes
         )
 

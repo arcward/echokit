@@ -25,9 +25,11 @@ def test_verify_app_id_override():
 
 def test_verify_app_id(set_color_intent_request):
     app = echokit.EchoKit("RandomID")
+
     @app.intent("MyColorIsIntent")
     def tmp_handler(request, session):
         return app.response("Hi")
+
     # Application ID in fixture doesn't match, should throw exc
     from echokit.exc import ASKException
     with pytest.raises(ASKException):

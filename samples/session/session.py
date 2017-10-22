@@ -59,14 +59,3 @@ def my_color_is_intent(request, session, color):
     response.simple_card(title="Your favorite color", content=color)
     response.end_session = False
     return response
-
-
-@app.intent('ShowCardIntent')
-def show_card_intent(request, session):
-    response = app.response("Here's your card")
-    return response.standard_card(
-        title="Your card",
-        text="Here's your example standard card with images",
-        small_image_url="https://s3.amazonaws.com/echobucket/small_img.png",
-        large_image_url="https://s3.amazonaws.com/echobucket/large_img.png"
-    )
