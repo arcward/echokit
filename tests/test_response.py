@@ -84,9 +84,12 @@ def test_link_account_card():
 
 def test_end_session():
     response = Response("")
-    response.end_session = True
     assert response.end_session == True
+    assert response._dict["response"]["shouldEndSession"] == True
 
+    response.end_session = False
+    assert response.end_session == False
+    assert response._dict["response"]["shouldEndSession"] == False
 
 def test_version():
     response = Response("")
@@ -98,13 +101,13 @@ def test_response_structure():
     response.session_attributes["who_loves_orange_soda"] = "kel_does"
     expected = {
         "version": "1.0",
-        "shouldEndSession": True,
         "sessionAttributes": {"who_loves_orange_soda": "kel_does"},
         "response": {
             "outputSpeech": {
                 "type": "PlainText",
-                "text": "Hello!"
-            }
+                "text": "Hello!",
+            },
+            "shouldEndSession": True,
         }
     }
     assert response._dict == expected
