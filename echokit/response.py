@@ -31,8 +31,9 @@ class Response:
         """
         self._dict = {
             'version': version,
-            'shouldEndSession': end_session,
-            'response': {}
+            'response': {
+                'shouldEndSession': end_session,
+            }
         }
         self.speech(speech, speech_type)
         if session_attributes:
@@ -43,11 +44,11 @@ class Response:
     @property
     def end_session(self):
         """The *shouldEndSession* attribute of the response"""
-        return self._dict['shouldEndSession']
+        return self._dict['response']['shouldEndSession']
 
     @end_session.setter
     def end_session(self, end_session):
-        self._dict['shouldEndSession'] = end_session
+        self._dict['response']['shouldEndSession'] = end_session
 
     @property
     def session_attributes(self):
